@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1050" viewBox="0 0 1600 1050" role="img" aria-labelledby="title desc">
+  <title id="title">DFD Level 1 - Eazy Logistics Project</title>
+  <desc id="desc">Level 1 data flow diagram for the Express, MongoDB, booking, listing, admin, payment, and AI categorizer modules.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M2 2 L10 6 L2 10 Z" fill="#334155"/>
+    </marker>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.14"/>
+    </filter>
+    <style>
+      .bg{fill:#f8fafc}
+      .title{font:700 34px Arial,Helvetica,sans-serif;fill:#0f172a}
+      .subtitle{font:400 16px Arial,Helvetica,sans-serif;fill:#475569}
+      .process{fill:#e0f2fe;stroke:#0369a1;stroke-width:2;filter:url(#softShadow)}
+      .entity{fill:#fff7ed;stroke:#c2410c;stroke-width:2;filter:url(#softShadow)}
+      .store{fill:#ecfdf5;stroke:#047857;stroke-width:2;filter:url(#softShadow)}
+      .external{fill:#f5f3ff;stroke:#6d28d9;stroke-width:2;filter:url(#softShadow)}
+      .label{font:700 16px Arial,Helvetica,sans-serif;fill:#0f172a}
+      .small{font:400 13px Arial,Helvetica,sans-serif;fill:#334155}
+      .flow{fill:none;stroke:#334155;stroke-width:2.2;marker-end:url(#arrow)}
+      .flowText{font:600 12px Arial,Helvetica,sans-serif;fill:#334155}
+      .legendText{font:600 13px Arial,Helvetica,sans-serif;fill:#475569}
+    </style>
+  </defs>
+
+  <rect class="bg" width="1600" height="1050"/>
+  <text class="title" x="64" y="64">DFD Level 1 - Eazy Logistics Project</text>
+  <text class="subtitle" x="64" y="92">Top-level data movement across users, listings, booking, admin control, external services, and MongoDB collections.</text>
+
+  <rect class="entity" x="64" y="170" width="190" height="86" rx="8"/>
+  <text class="label" x="108" y="203">Guest / User</text>
+  <text class="small" x="91" y="228">search, signup, login,</text>
+  <text class="small" x="112" y="246">book, review</text>
+
+  <rect class="entity" x="64" y="450" width="190" height="86" rx="8"/>
+  <text class="label" x="124" y="484">Host</text>
+  <text class="small" x="95" y="509">profile, listing, legal</text>
+  <text class="small" x="117" y="527">documents</text>
+
+  <rect class="entity" x="64" y="730" width="190" height="86" rx="8"/>
+  <text class="label" x="119" y="764">Admin</text>
+  <text class="small" x="93" y="789">dashboard, verify,</text>
+  <text class="small" x="104" y="807">reports, safety</text>
+
+  <rect class="process" x="410" y="150" width="230" height="112" rx="18"/>
+  <text class="label" x="465" y="188">1.0 Auth and</text>
+  <text class="label" x="482" y="210">Profiles</text>
+  <text class="small" x="446" y="237">local, social, passkey,</text>
+  <text class="small" x="476" y="255">preferences</text>
+
+  <rect class="process" x="410" y="338" width="230" height="112" rx="18"/>
+  <text class="label" x="454" y="377">2.0 Listings and</text>
+  <text class="label" x="488" y="399">Search</text>
+  <text class="small" x="452" y="426">create, geocode, images,</text>
+  <text class="small" x="477" y="444">AI category</text>
+
+  <rect class="process" x="410" y="526" width="230" height="112" rx="18"/>
+  <text class="label" x="452" y="565">3.0 Booking and</text>
+  <text class="label" x="480" y="587">Payment</text>
+  <text class="small" x="450" y="614">confirm, pay, receipt,</text>
+  <text class="small" x="467" y="632">stay status</text>
+
+  <rect class="process" x="410" y="714" width="230" height="112" rx="18"/>
+  <text class="label" x="454" y="753">4.0 Admin and</text>
+  <text class="label" x="486" y="775">Reports</text>
+  <text class="small" x="456" y="802">users, bookings, listing</text>
+  <text class="small" x="482" y="820">verification</text>
+
+  <rect class="process" x="725" y="430" width="230" height="112" rx="18"/>
+  <text class="label" x="764" y="469">5.0 Reviews and</text>
+  <text class="label" x="774" y="491">Verification</text>
+  <text class="small" x="763" y="518">ratings, certificates,</text>
+  <text class="small" x="792" y="536">QR checks</text>
+
+  <path class="store" d="M1045 142 H1265 C1292 142 1292 258 1265 258 H1045 C1072 258 1072 142 1045 142 Z"/>
+  <text class="label" x="1106" y="188">D1 Users</text>
+  <text class="small" x="1091" y="216">accounts, roles, passkeys</text>
+
+  <path class="store" d="M1045 306 H1265 C1292 306 1292 422 1265 422 H1045 C1072 422 1072 306 1045 306 Z"/>
+  <text class="label" x="1094" y="352">D2 Listings</text>
+  <text class="small" x="1096" y="380">properties, docs, maps</text>
+
+  <path class="store" d="M1045 470 H1265 C1292 470 1292 586 1265 586 H1045 C1072 586 1072 470 1045 470 Z"/>
+  <text class="label" x="1090" y="516">D3 Bookings</text>
+  <text class="small" x="1099" y="544">guest, dates, payment</text>
+
+  <path class="store" d="M1045 634 H1265 C1292 634 1292 750 1265 750 H1045 C1072 750 1072 634 1045 634 Z"/>
+  <text class="label" x="1096" y="680">D4 Reviews</text>
+  <text class="small" x="1106" y="708">ratings, comments</text>
+
+  <path class="store" d="M1045 798 H1265 C1292 798 1292 914 1265 914 H1045 C1072 914 1072 798 1045 798 Z"/>
+  <text class="label" x="1074" y="844">D5 Admin Invites</text>
+  <text class="small" x="1094" y="872">security codes, reports</text>
+
+  <rect class="external" x="1375" y="152" width="170" height="76" rx="8"/>
+  <text class="label" x="1418" y="184">OAuth /</text>
+  <text class="label" x="1411" y="206">Passkeys</text>
+
+  <rect class="external" x="1375" y="290" width="170" height="76" rx="8"/>
+  <text class="label" x="1417" y="322">Cloudinary</text>
+  <text class="small" x="1410" y="344">images, PDFs</text>
+
+  <rect class="external" x="1375" y="428" width="170" height="76" rx="8"/>
+  <text class="label" x="1420" y="460">Mapbox</text>
+  <text class="small" x="1412" y="482">geocode, route</text>
+
+  <rect class="external" x="1375" y="566" width="170" height="76" rx="8"/>
+  <text class="label" x="1406" y="598">Cashfree /</text>
+  <text class="label" x="1424" y="620">Email</text>
+
+  <rect class="external" x="1375" y="704" width="170" height="76" rx="8"/>
+  <text class="label" x="1407" y="736">Python AI</text>
+  <text class="small" x="1403" y="758">category service</text>
+
+  <line class="flow" x1="254" y1="213" x2="410" y2="206"/>
+  <text class="flowText" x="285" y="196">credentials/profile</text>
+  <line class="flow" x1="640" y1="206" x2="1045" y2="200"/>
+  <text class="flowText" x="758" y="188">user records</text>
+  <line class="flow" x1="640" y1="178" x2="1375" y2="188"/>
+  <text class="flowText" x="884" y="164">social/passkey challenge</text>
+
+  <line class="flow" x1="254" y1="226" x2="410" y2="380"/>
+  <text class="flowText" x="280" y="307">search request</text>
+  <line class="flow" x1="254" y1="493" x2="410" y2="394"/>
+  <text class="flowText" x="283" y="450">listing details</text>
+  <line class="flow" x1="640" y1="394" x2="1045" y2="364"/>
+  <text class="flowText" x="758" y="360">listing data</text>
+  <line class="flow" x1="640" y1="358" x2="1375" y2="328"/>
+  <text class="flowText" x="806" y="326">uploads</text>
+  <line class="flow" x1="640" y1="418" x2="1375" y2="466"/>
+  <text class="flowText" x="824" y="452">location lookup</text>
+  <line class="flow" x1="640" y1="446" x2="1375" y2="742"/>
+  <text class="flowText" x="830" y="624">category prediction</text>
+
+  <line class="flow" x1="254" y1="236" x2="410" y2="572"/>
+  <text class="flowText" x="286" y="407">booking info</text>
+  <line class="flow" x1="640" y1="582" x2="1045" y2="528"/>
+  <text class="flowText" x="752" y="533">booking records</text>
+  <line class="flow" x1="640" y1="608" x2="1375" y2="604"/>
+  <text class="flowText" x="842" y="592">payment and receipt email</text>
+
+  <line class="flow" x1="254" y1="773" x2="410" y2="770"/>
+  <text class="flowText" x="286" y="754">admin actions</text>
+  <line class="flow" x1="640" y1="770" x2="1045" y2="856"/>
+  <text class="flowText" x="773" y="835">invites/reports</text>
+  <line class="flow" x1="640" y1="748" x2="1045" y2="364"/>
+  <text class="flowText" x="756" y="705">listing moderation</text>
+  <line class="flow" x1="640" y1="794" x2="1045" y2="528"/>
+  <text class="flowText" x="757" y="776">booking status</text>
+
+  <line class="flow" x1="254" y1="242" x2="725" y2="486"/>
+  <text class="flowText" x="428" y="512">review / verification view</text>
+  <line class="flow" x1="955" y1="486" x2="1045" y2="692"/>
+  <text class="flowText" x="960" y="620">review data</text>
+  <line class="flow" x1="955" y1="466" x2="1045" y2="364"/>
+  <text class="flowText" x="950" y="418">certificate status</text>
+  <line class="flow" x1="955" y1="510" x2="1375" y2="328"/>
+  <text class="flowText" x="1115" y="434">certificate PDFs</text>
+
+  <rect x="64" y="940" width="1470" height="60" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+  <circle cx="92" cy="970" r="8" fill="#fff7ed" stroke="#c2410c" stroke-width="2"/>
+  <text class="legendText" x="110" y="975">External actors</text>
+  <circle cx="255" cy="970" r="8" fill="#e0f2fe" stroke="#0369a1" stroke-width="2"/>
+  <text class="legendText" x="273" y="975">Application processes</text>
+  <circle cx="470" cy="970" r="8" fill="#ecfdf5" stroke="#047857" stroke-width="2"/>
+  <text class="legendText" x="488" y="975">MongoDB / local data stores</text>
+  <circle cx="742" cy="970" r="8" fill="#f5f3ff" stroke="#6d28d9" stroke-width="2"/>
+  <text class="legendText" x="760" y="975">External services</text>
+</svg>

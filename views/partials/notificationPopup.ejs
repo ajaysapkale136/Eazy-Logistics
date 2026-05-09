@@ -1,0 +1,33 @@
+<div id="notifPopup" class="notif-popup" style="display:none;">
+  <div class="notif-card glass-card">
+    <div class="d-flex justify-content-between">
+      <div>
+        <strong>New: Smart category detection</strong>
+        <div class="small text-muted">Auto tags added to new listings</div>
+      </div>
+      <div>
+        <button id="notifClose" class="btn btn-sm btn-outline-secondary">Dismiss</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const popup = document.getElementById('notifPopup');
+    const closeBtn = document.getElementById('notifClose');
+
+    // show based on user preference
+    const notificationsEnabled = <%= JSON.stringify( (locals.currUser && locals.currUser.preferences?.notifications?.enabled) === true ) %>;
+
+    if (notificationsEnabled) {
+      setTimeout(()=> popup.style.display = 'block', 1200);
+    }
+
+    closeBtn?.addEventListener('click', async () => {
+      popup.style.display = 'none';
+      // mark seen server-side
+      await fetch('/profile/notifications/seen', { method: 'POST' });
+    });
+  })();
+</script>

@@ -1,0 +1,356 @@
+<% layout("layouts/boilerplate") %>
+
+<div class="container mt-5 profile-page <%= theme %>">
+
+  <div class="glass-card profile-sidebar hover-float">
+    <div class="text-center py-4">
+      <img 
+        src="<%= currUser?.profileImage?.url 
+              || currUser?.profileImage?.[0]?.url
+              || '/images/default-avatar.png' %>" 
+        class="profile-photo-lg"
+      >
+      <h5 class="mt-2"><%= currUser?.username %></h5>
+      <p class="small text-muted"><%= currUser?.email %></p>
+    </div>
+
+    <div class="p-3">
+      <a href="/profile/me" class="menu-item"><i class="fa fa-user"></i> Profile Overview</a>
+      <a href="/profile/edit" class="menu-item"><i class="fa fa-pen"></i> Edit Profile</a>
+      <a href="/profile/listings" class="menu-item"><i class="fa fa-home"></i> My Listings</a>
+      <a href="/profile/password" class="menu-item"><i class="fa fa-lock"></i> Change Password</a>
+      <a href="/profile/settings" class="menu-item active"><i class="fa fa-cog"></i> Settings</a>
+    </div>
+  </div>
+
+  <div class="glass-card profile-main hover-float">
+    <h4>Settings</h4>
+
+    <form action="/profile/settings?_method=PUT" method="POST" id="settingsForm">
+      <input type="hidden" name="language" value="<%= user.preferences?.language || 'en' %>">
+
+      <!-- ======================= THEME BUTTONS ======================= -->
+      <div class="mb-3">
+        <label class="form-label fw-bold">Theme</label>
+
+        <div class="theme-options">
+          <label class="theme-option">
+            <input type="radio" name="theme" value="light" <%= user.preferences.theme === 'light' ? 'checked' : '' %>>
+            Light
+          </label>
+
+          <label class="theme-option">
+            <input type="radio" name="theme" value="dark" <%= user.preferences.theme === 'dark' ? 'checked' : '' %>>
+            Dark
+          </label>
+
+          <label class="theme-option">
+            <input type="radio" name="theme" value="midnight" <%= user.preferences.theme === 'midnight' ? 'checked' : '' %>>
+            Midnight
+          </label>
+
+          <label class="theme-option">
+            <input type="radio" name="theme" value="neon" <%= user.preferences.theme === 'neon' ? 'checked' : '' %>>
+            Neon
+          </label>
+        </div>
+      </div>
+      <!-- ============================================================= -->
+
+      <!-- ======================= LANGUAGE OPTIONS ======================= -->
+     <div class="glass-lang-card mt-3">
+  <h5 class="mb-2">🌐 Language</h5>
+
+  <!-- Your normal English/Hindi selection -->
+  <!-- <select name="language" class="form-select mb-3">
+    <option value="en" <%= (user.preferences?.language || 'en') === 'en' ? 'selected' : '' %>>English</option>
+    <option value="hi" <%= user.preferences?.language === 'hi' ? 'selected' : '' %>>Hindi</option>
+  </select> -->
+
+  <!-- Premium glowing Google Translate button -->
+  <button 
+    type="button" 
+    onclick="openTranslator()" 
+    class="btn btn-outline-primary w-100"
+    style="border-radius:12px; font-weight:600;"
+  >
+    🌐 Translate Website (Google AI)
+  </button>
+
+  <div id="google_translate_element" style="display:none; margin-top:10px;"></div>
+</div>
+      <!-- ================================================================ -->
+
+      <div class="form-check form-switch mb-3">
+        <input 
+          class="form-check-input" 
+          type="checkbox" 
+          id="notifToggle" 
+          name="notificationsEnabled"
+          value="<%= user.preferences?.notifications?.enabled ? 'true' : 'false' %>"
+          <%= user.preferences?.notifications?.enabled ? 'checked' : '' %> 
+        >
+        <label class="form-check-label" for="notifToggle">Enable in-app notifications</label>
+      </div>
+
+      <div class="glass-lang-card mt-4" style="padding:18px; border:1px solid #e5e7eb; border-radius:16px;">
+        <h5 class="mb-2">Face Authentication Login</h5>
+        <p style="font-size:13px; color:#64748b; margin-bottom:14px;">
+          Enable face authentication so you can log in with Face ID, fingerprint, or Windows Hello instead of typing your password every time.
+        </p>
+        <div id="passkeyStatus" style="display:none; margin-bottom:12px; font-size:12px; border-radius:10px; padding:8px 10px;"></div>
+
+        <button
+          type="button"
+          id="registerPasskeyBtn"
+          class="btn btn-outline-dark"
+          style="border-radius:12px; font-weight:700;"
+        >
+          Enable Face Authentication
+        </button>
+
+        <% if (user.passkeys && user.passkeys.length > 0) { %>
+          <div id="passkeyList" style="margin-top:16px;">
+            <% user.passkeys.forEach((passkey) => { %>
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 0; border-top:1px solid #e5e7eb;">
+                <div>
+                  <strong><%= passkey.label || 'Face Authentication Login' %></strong>
+                  <div style="font-size:12px; color:#64748b;">
+                    Added <%= new Date(passkey.createdAt).toLocaleDateString() %>
+                    <% if (passkey.lastUsedAt) { %>
+                      - Last used <%= new Date(passkey.lastUsedAt).toLocaleDateString() %>
+                    <% } %>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  data-passkey-remove="<%= encodeURIComponent(passkey.id) %>"
+                >
+                  Remove
+                </button>
+              </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <div id="passkeyList" style="margin-top:12px; font-size:12px; color:#94a3b8;">No face-authentication devices registered yet.</div>
+        <% } %>
+      </div>
+
+      <button class="btn modern-btn">Save Settings</button>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= THEME JS ======================= -->
+<script>
+  document.querySelectorAll("input[name='theme']").forEach(btn => {
+      btn.addEventListener("change", () => {
+          localStorage.setItem("theme", btn.value);
+      });
+  });
+
+  // Show Google Translate widget ONLY when user clicks the button
+  function openTranslator() {
+    const el = document.getElementById("google_translate_element");
+    el.style.display = "block";
+  }
+
+  function base64UrlToBuffer(value) {
+    const padding = "=".repeat((4 - (value.length % 4)) % 4);
+    const base64 = (value + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const raw = atob(base64);
+    return Uint8Array.from(raw, (char) => char.charCodeAt(0));
+  }
+
+  function bufferToBase64Url(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    bytes.forEach((byte) => {
+      binary += String.fromCharCode(byte);
+    });
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+  }
+
+  function serializeAttestation(credential) {
+    return {
+      id: credential.id,
+      rawId: bufferToBase64Url(credential.rawId),
+      type: credential.type,
+      response: {
+        attestationObject: bufferToBase64Url(credential.response.attestationObject),
+        clientDataJSON: bufferToBase64Url(credential.response.clientDataJSON),
+        transports: credential.response.getTransports ? credential.response.getTransports() : [],
+      },
+      clientExtensionResults: credential.getClientExtensionResults(),
+    };
+  }
+
+  function showPasskeyStatus(message, type = "info") {
+    const status = document.getElementById("passkeyStatus");
+    if (!status) return;
+
+    const styles = {
+      info: { bg: "#eff6ff", color: "#1d4ed8", border: "#bfdbfe" },
+      success: { bg: "#ecfdf5", color: "#047857", border: "#6ee7b7" },
+      error: { bg: "#fff1f2", color: "#be123c", border: "#fecdd3" },
+    };
+
+    const theme = styles[type] || styles.info;
+    status.style.display = "block";
+    status.style.background = theme.bg;
+    status.style.color = theme.color;
+    status.style.border = `1px solid ${theme.border}`;
+    status.textContent = message;
+  }
+
+  function formatPasskeyDate(value) {
+    if (!value) return "";
+    try {
+      return new Date(value).toLocaleDateString();
+    } catch {
+      return "";
+    }
+  }
+
+  function renderPasskeys(passkeys = []) {
+    const list = document.getElementById("passkeyList");
+    if (!list) return;
+
+    if (!Array.isArray(passkeys) || passkeys.length === 0) {
+      list.innerHTML = '<div style="margin-top:12px; font-size:12px; color:#94a3b8;">No face-authentication devices registered yet.</div>';
+      return;
+    }
+
+    list.innerHTML = passkeys
+      .map((passkey) => {
+        const added = formatPasskeyDate(passkey.createdAt);
+        const used = formatPasskeyDate(passkey.lastUsedAt);
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 0; border-top:1px solid #e5e7eb;">
+            <div>
+              <strong>${passkey.label || "Face Authentication Login"}</strong>
+              <div style="font-size:12px; color:#64748b;">
+                Added ${added || "recently"}${used ? ` - Last used ${used}` : ""}
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-danger"
+              data-passkey-remove="${encodeURIComponent(passkey.id)}"
+            >
+              Remove
+            </button>
+          </div>
+        `;
+      })
+      .join("");
+  }
+
+  async function refreshPasskeys() {
+    try {
+      const res = await fetch("/face-auth/status", {
+        method: "GET",
+        headers: { Accept: "application/json" },
+      });
+
+      const data = await res.json();
+      if (!data.ok) return;
+      renderPasskeys(data.passkeys || []);
+    } catch {
+      // keep server-rendered fallback UI
+    }
+  }
+
+  document.getElementById("registerPasskeyBtn")?.addEventListener("click", async () => {
+    if (!window.PublicKeyCredential || !navigator.credentials) {
+      showPasskeyStatus("Face authentication is not supported on this device/browser.", "error");
+      return;
+    }
+
+    const button = document.getElementById("registerPasskeyBtn");
+    const originalText = button.innerText;
+    button.disabled = true;
+    button.innerText = "Preparing...";
+    showPasskeyStatus("Waiting for device confirmation...", "info");
+
+    try {
+      const startRes = await fetch("/face-auth/register/options", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const startData = await startRes.json();
+
+      if (!startData.ok) {
+        throw new Error(startData.message || "Could not start face authentication setup.");
+      }
+
+      const publicKey = {
+        ...startData.options,
+        challenge: base64UrlToBuffer(startData.options.challenge),
+        user: {
+          ...startData.options.user,
+          id: base64UrlToBuffer(startData.options.user.id),
+        },
+        excludeCredentials: (startData.options.excludeCredentials || []).map((item) => ({
+          ...item,
+          id: base64UrlToBuffer(item.id),
+        })),
+      };
+
+      const credential = await navigator.credentials.create({ publicKey });
+
+      const verifyRes = await fetch("/face-auth/register/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ credential: serializeAttestation(credential) }),
+      });
+
+      let verifyData = {};
+      try {
+        verifyData = await verifyRes.json();
+      } catch {
+        throw new Error("Face authentication response was invalid.");
+      }
+
+      if (!verifyData.ok) {
+        throw new Error(verifyData.message || "Could not finish face authentication setup.");
+      }
+
+      renderPasskeys(verifyData.passkeys || []);
+      showPasskeyStatus("Face authentication enabled successfully. Your device is now linked.", "success");
+    } catch (error) {
+      showPasskeyStatus(error.message || "Face authentication setup failed.", "error");
+    } finally {
+      button.disabled = false;
+      button.innerText = originalText;
+    }
+  });
+
+  document.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-passkey-remove]");
+    if (!button) return;
+
+    const credentialId = button.getAttribute("data-passkey-remove");
+    if (!confirm("Remove this face-authentication device?")) return;
+
+    try {
+      const res = await fetch(`/face-auth/${credentialId}/delete`, {
+        method: "POST",
+        headers: { Accept: "application/json" },
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        throw new Error("Could not remove this face-authentication device.");
+      }
+
+      renderPasskeys(data.passkeys || []);
+      showPasskeyStatus("Face authentication device removed successfully.", "info");
+    } catch (error) {
+      showPasskeyStatus(error.message || "Could not remove this face-authentication device.", "error");
+    }
+  });
+
+  refreshPasskeys();
+</script>

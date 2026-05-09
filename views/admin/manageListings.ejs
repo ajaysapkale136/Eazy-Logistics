@@ -1,0 +1,218 @@
+<% layout("admin/layouts/admin-boilerplate") %>
+
+<div class="panel glass">
+  <div class="panel-head">
+    <h4>Manage Listings</h4>
+
+    <div class="filter-row">
+      <input id="listingsSearch" class="input" placeholder="Search title, location..." />
+
+      <select id="listingsStatusFilter" class="input">
+        <option value="">All</option>
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+      </select>
+
+      <button id="btnReloadListings" class="btn ghost">Reload</button>
+    </div>
+  </div>
+
+  <div class="panel-body">
+    <table id="listingsTable" class="admin-table" style="width:100%">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Location</th>
+          <th>Price</th>
+          <th>Listing Status</th>
+          <th>Legal Documents</th>
+          <th style="width:240px">Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div id="listingsPagination" class="pagination"></div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const tableBody = document.querySelector("#listingsTable tbody");
+  const search = document.getElementById("listingsSearch");
+  const status = document.getElementById("listingsStatusFilter");
+  const btnReload = document.getElementById("btnReloadListings");
+
+  let page = 1;
+  const limit = 10;
+
+  async function loadListings() {
+    const q = encodeURIComponent(search.value || "");
+    const st = encodeURIComponent(status.value || "");
+
+    const res = await fetch(`/admin/api/listings?page=${page}&limit=${limit}&q=${q}&status=${st}`);
+    const data = await res.json();
+
+    tableBody.innerHTML = data.listings.map((listing) => buildRow(listing)).join("");
+    setupPagination(data.total);
+  }
+
+  function buildRow(listing) {
+    const documentCount = Array.isArray(listing.legalDocuments) ? listing.legalDocuments.length : 0;
+    const verification = listing.verificationStatus || "not_submitted";
+    const docsHtml = buildDocumentLinks(listing.legalDocuments || []);
+    const certificateHtml = listing.verificationCertificate?.url
+      ? `
+          <a class="btn ghost" href="${escapeHtml(listing.verificationCertificate.url)}" target="_blank" rel="noopener noreferrer">
+            Verified PDF
+          </a>
+        `
+      : "";
+
+    return `
+      <tr>
+        <td>
+          <strong>${escapeHtml(listing.title)}</strong>
+          <div style="font-size:11px; color:#64748b;">${escapeHtml(listing.owner?.username || "Unknown owner")}</div>
+        </td>
+        <td>${escapeHtml(listing.location)}</td>
+        <td>Rs.${Number(listing.price || 0).toLocaleString("en-IN")}</td>
+        <td>${escapeHtml(listing.status || "approved")}</td>
+        <td>
+          <div>${documentCount} file(s)</div>
+          <div style="font-size:11px; color:${verification === "verified" ? "#15803d" : (verification === "pending" ? "#b45309" : (verification === "rejected" ? "#dc2626" : "#64748b"))};">
+            ${verification.replace("_", " ")}
+          </div>
+          <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
+            ${docsHtml}
+            ${certificateHtml}
+          </div>
+        </td>
+        <td>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn ghost" onclick="approveListing('${listing._id}')">Approve</button>
+            <button class="btn ghost" onclick="verifyDocs('${listing._id}')">Verify Docs</button>
+            <button class="btn ghost" onclick="rejectDocs('${listing._id}')">Reject Docs</button>
+            <button class="btn ghost" onclick="editListing('${listing._id}')">Edit</button>
+            <button class="btn danger" onclick="deleteListing('${listing._id}')">Delete</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+
+  function setupPagination(total) {
+    const totalPages = Math.ceil(total / limit);
+    const container = document.getElementById("listingsPagination");
+    let html = "";
+
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button class="btn ghost ${i === page ? "active" : ""}" data-page="${i}">${i}</button>`;
+    }
+
+    container.innerHTML = html;
+    container.querySelectorAll("button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        page = Number(btn.dataset.page);
+        loadListings();
+      });
+    });
+  }
+
+  window.approveListing = async (id) => {
+    if (!confirm("Approve this listing?")) return;
+    await fetch(`/admin/api/listings/${id}/approve`, { method: "POST" });
+    loadListings();
+  };
+
+  window.verifyDocs = async (id) => {
+    const note = prompt("Optional admin note for verified documents:", "") || "";
+    const res = await fetch(`/admin/api/listings/${id}/verify`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ note }),
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      alert(data.error || "Could not verify documents.");
+      return;
+    }
+    loadListings();
+  };
+
+  window.rejectDocs = async (id) => {
+    const note = prompt("Why are these legal documents rejected?", "Documents require correction.");
+    if (note === null) return;
+
+    const res = await fetch(`/admin/api/listings/${id}/reject`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ note }),
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      alert(data.error || "Could not reject documents.");
+      return;
+    }
+    loadListings();
+  };
+
+  window.editListing = (id) => {
+    location.href = `/listings/${id}/edit`;
+  };
+
+  window.deleteListing = async (id) => {
+    if (!confirm("Delete permanently?")) return;
+    await fetch(`/admin/api/listings/${id}`, { method: "DELETE" });
+    loadListings();
+  };
+
+  btnReload.addEventListener("click", loadListings);
+  search.addEventListener("input", debounce(() => {
+    page = 1;
+    loadListings();
+  }, 300));
+  status.addEventListener("change", () => {
+    page = 1;
+    loadListings();
+  });
+
+  function debounce(fn, delay = 300) {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), delay);
+    };
+  }
+
+  function escapeHtml(value = "") {
+    return String(value).replace(/[&<>"'`]/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+      "`": "&#96;"
+    }[char]));
+  }
+
+  function buildDocumentLinks(documents = []) {
+    if (!Array.isArray(documents) || !documents.length) {
+      return `<span style="font-size:11px; color:#94a3b8;">No docs</span>`;
+    }
+
+    return documents.map((doc, index) => {
+      const url = escapeHtml(doc.url || "");
+      if (!url) return "";
+      return `
+        <a class="btn ghost" href="${url}" target="_blank" rel="noopener noreferrer">
+          Doc ${index + 1}
+        </a>
+      `;
+    }).join("");
+  }
+
+  loadListings();
+});
+</script>

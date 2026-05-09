@@ -1,0 +1,10 @@
+<svg width="1024" height="256" viewBox="0 0 1024 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="16" y="32" width="192" height="192" rx="48" fill="#FE424D"/>
+  <path d="M64 151L106.5 82H160L117.5 151H64Z" fill="white"/>
+  <path d="M64 178L80.5 151H160L143.5 178H64Z" fill="white" fill-opacity="0.9"/>
+  <circle cx="96" cy="130" r="14" fill="#FE424D"/>
+  <circle cx="96" cy="130" r="6" fill="white"/>
+  <path d="M115 82H160L147 103H102L115 82Z" fill="#111827" fill-opacity="0.18"/>
+  <text x="244" y="116" fill="#111827" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="54" font-weight="800">Eazy-Logistics</text>
+  <text x="246" y="164" fill="#64748B" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="26" font-weight="700">Stay, travel, and book with confidence</text>
+</svg>

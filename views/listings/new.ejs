@@ -1,0 +1,270 @@
+<% layout("layouts/boilerplate") %>
+
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap");
+
+  .listing-form-page {
+    max-width: 1020px;
+    margin: 1.2rem auto 2.4rem;
+    padding: 0 1rem;
+    font-family: "Manrope", sans-serif;
+    position: relative;
+  }
+
+  .listing-form-page::before {
+    content: "";
+    position: absolute;
+    inset: -20px -10px auto -10px;
+    height: 260px;
+    background:
+      radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.22), transparent 40%),
+      radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.25), transparent 34%),
+      radial-gradient(circle at 60% 60%, rgba(16, 185, 129, 0.15), transparent 42%);
+    filter: blur(6px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .listing-form-hero {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(130deg, #0f172a 0%, #d81d39 52%, #0369a1 100%);
+    color: #f8fafc;
+    border-radius: 22px;
+    padding: 1.65rem 1.45rem;
+    box-shadow: 0 24px 44px rgba(15, 23, 42, 0.34);
+    margin-bottom: 1.15rem;
+    overflow: hidden;
+  }
+
+  .listing-form-hero::after {
+    content: "";
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.09);
+    top: -120px;
+    right: -90px;
+  }
+
+  .listing-form-hero h3 {
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    font-size: 1.9rem;
+  }
+
+  .listing-form-hero p {
+    margin: 0.55rem 0 0;
+    color: #dbeafe;
+    font-size: 1rem;
+    max-width: 700px;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.76rem;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 0.28rem 0.65rem;
+    border-radius: 999px;
+    margin-bottom: 0.8rem;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    font-weight: 700;
+  }
+
+  .listing-form-card {
+    position: relative;
+    z-index: 1;
+    background: #ffffff;
+    border: 1px solid #dbe5f0;
+    border-radius: 20px;
+    padding: 1.35rem;
+    box-shadow:
+      0 16px 32px rgba(15, 23, 42, 0.09),
+      0 1px 0 rgba(255, 255, 255, 0.75) inset;
+  }
+
+  .listing-form-section {
+    border: 1px solid #dfe8f2;
+    border-radius: 16px;
+    padding: 1.05rem;
+    background: linear-gradient(180deg, #f8fbff 0%, #f3f7fc 100%);
+    margin-bottom: 1.05rem;
+  }
+
+  .listing-form-section h6 {
+    margin: 0 0 0.95rem;
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 0.88rem;
+    letter-spacing: 0.65px;
+    text-transform: uppercase;
+  }
+
+  .listing-form-card .form-label {
+    font-size: 0.87rem;
+    color: #334155;
+    font-weight: 700;
+    margin-bottom: 0.42rem;
+  }
+
+  .listing-form-card .form-control,
+  .listing-form-card .form-select {
+    border-radius: 11px;
+    border: 1px solid #c6d3e2;
+    min-height: 47px;
+    background: #ffffff;
+    font-weight: 600;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .listing-form-card textarea.form-control {
+    min-height: 130px;
+    font-weight: 500;
+  }
+
+  .listing-form-card .form-control:focus,
+  .listing-form-card .form-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14);
+    transform: translateY(-1px);
+  }
+
+  .file-box {
+    border: 1.5px dashed #8ca4bf;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    padding: 0.95rem;
+  }
+
+  .listing-submit-btn {
+    border-radius: 11px;
+    padding: 0.7rem 1.35rem;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.22);
+  }
+
+  .listing-submit-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 768px) {
+    .listing-form-hero,
+    .listing-form-card {
+      border-radius: 14px;
+      padding: 1rem;
+    }
+  }
+</style>
+
+<section class="listing-form-page">
+  <div class="listing-form-hero">
+    <span class="hero-badge">Premium Host Console</span>
+    <h3>Create a New Listing</h3>
+    <p>Create your listing with confidence — simple steps, powerful results, and a professional touch.</p>
+  </div>
+
+  <div class="listing-form-card">
+    <form
+      method="POST"
+      action="/listings"
+      enctype="multipart/form-data"
+      class="needs-validation"
+      novalidate
+    >
+      <div class="listing-form-section">
+        <h6>Basic Information</h6>
+        <div class="mb-3">
+          <label class="form-label">Title</label>
+          <input type="text" name="listing[title]" class="form-control" required />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea name="listing[description]" class="form-control" required></textarea>
+        </div>
+
+        <div class="mb-0">
+          <label class="form-label">Category</label>
+          <select name="listing[category]" class="form-select">
+            <option value="">Auto-detect (Recommended)</option>
+            <option value="Trending">Trending</option>
+            <option value="Rooms">Rooms</option>
+            <option value="Iconic Citys">Iconic Citys</option>
+            <option value="Mountain">Mountain</option>
+            <option value="Castles">Castles</option>
+            <option value="Amazing Pools">Amazing Pools</option>
+            <option value="Camping">Camping</option>
+            <option value="Farms">Farms</option>
+            <option value="Arctic">Arctic</option>
+            <option value="Domes">Domes</option>
+            <option value="Boats">Boats</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="listing-form-section">
+        <h6>Photos and Legal Documents</h6>
+        <div class="mb-3">
+          <label class="form-label">Upload Images</label>
+          <div class="file-box">
+            <input type="file" name="listing[images]" class="form-control" multiple required />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Property Legal Documents</label>
+          <div class="file-box">
+            <input
+              type="file"
+              name="listing[legalDocuments]"
+              class="form-control"
+              multiple
+              accept=".pdf,image/*"
+            />
+          </div>
+          <div class="form-text mt-2">
+            Upload property papers, registration proof, or ownership documents so users can see the listing is genuine.
+          </div>
+        </div>
+
+        <div class="mb-0">
+          <label class="form-label">Legal Document Label</label>
+          <input
+            type="text"
+            name="listing[legalDocumentLabel]"
+            class="form-control"
+            placeholder="Example: Registry copy / Sale deed"
+          />
+        </div>
+      </div>
+
+      <div class="listing-form-section">
+        <h6>Pricing and Location</h6>
+        <div class="row">
+          <div class="mb-3 col-md-4">
+            <label class="form-label">Price</label>
+            <input type="number" name="listing[price]" class="form-control" required />
+          </div>
+
+          <div class="mb-3 col-md-8">
+            <label class="form-label">Country</label>
+            <input type="text" name="listing[country]" class="form-control" required />
+          </div>
+        </div>
+
+        <div class="mb-0">
+          <label class="form-label">Location</label>
+          <input type="text" name="listing[location]" class="form-control" required />
+        </div>
+      </div>
+
+      <button class="btn btn-dark listing-submit-btn mt-2">Add Listing</button>
+    </form>
+  </div>
+</section>

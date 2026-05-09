@@ -1,0 +1,235 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="1250" viewBox="0 0 1900 1250" role="img" aria-labelledby="title desc">
+  <title id="title">DFD Level 3 - Booking and Verification Details</title>
+  <desc id="desc">Level 3 data flow diagram showing detailed booking, payment, receipt, stay safety, and listing verification flows.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M2 2 L10 6 L2 10 Z" fill="#334155"/>
+    </marker>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .bg{fill:#f8fafc}
+      .title{font:700 34px Arial,Helvetica,sans-serif;fill:#0f172a}
+      .subtitle{font:400 16px Arial,Helvetica,sans-serif;fill:#475569}
+      .section{fill:#ffffff;stroke:#cbd5e1;stroke-width:2}
+      .sectionTitle{font:700 18px Arial,Helvetica,sans-serif;fill:#0f172a}
+      .process{fill:#e0f2fe;stroke:#0369a1;stroke-width:2;filter:url(#softShadow)}
+      .entity{fill:#fff7ed;stroke:#c2410c;stroke-width:2;filter:url(#softShadow)}
+      .store{fill:#ecfdf5;stroke:#047857;stroke-width:2;filter:url(#softShadow)}
+      .external{fill:#f5f3ff;stroke:#6d28d9;stroke-width:2;filter:url(#softShadow)}
+      .label{font:700 14px Arial,Helvetica,sans-serif;fill:#0f172a}
+      .small{font:400 12px Arial,Helvetica,sans-serif;fill:#334155}
+      .flow{fill:none;stroke:#334155;stroke-width:2;marker-end:url(#arrow)}
+      .flowLight{fill:none;stroke:#64748b;stroke-width:1.7;marker-end:url(#arrow)}
+      .flowText{font:600 11px Arial,Helvetica,sans-serif;fill:#334155}
+    </style>
+  </defs>
+
+  <rect class="bg" width="1900" height="1250"/>
+  <text class="title" x="60" y="62">DFD Level 3 - Detailed Booking, Payment, Safety and Verification</text>
+  <text class="subtitle" x="60" y="90">Detailed decomposition of the project's highest-risk workflows: booking/payment/receipt and admin document verification.</text>
+
+  <rect class="entity" x="60" y="170" width="170" height="72" rx="8"/>
+  <text class="label" x="103" y="201">Guest / User</text>
+  <text class="small" x="88" y="224">booking and payment</text>
+
+  <rect class="entity" x="60" y="660" width="170" height="72" rx="8"/>
+  <text class="label" x="122" y="691">Host</text>
+  <text class="small" x="90" y="714">property documents</text>
+
+  <rect class="entity" x="60" y="920" width="170" height="72" rx="8"/>
+  <text class="label" x="119" y="951">Admin</text>
+  <text class="small" x="88" y="974">verification and safety</text>
+
+  <rect class="section" x="300" y="135" width="620" height="455" rx="14"/>
+  <text class="sectionTitle" x="322" y="166">3.x Booking and Payment Decomposition</text>
+
+  <rect class="process" x="330" y="205" width="145" height="70" rx="14"/>
+  <text class="label" x="353" y="232">3.1.1 Load</text>
+  <text class="label" x="356" y="250">Listing</text>
+  <text class="small" x="351" y="267">show confirm page</text>
+
+  <rect class="process" x="540" y="205" width="145" height="70" rx="14"/>
+  <text class="label" x="561" y="232">3.1.2 Validate</text>
+  <text class="label" x="575" y="250">Dates</text>
+  <text class="small" x="559" y="267">nights and guests</text>
+
+  <rect class="process" x="750" y="205" width="145" height="70" rx="14"/>
+  <text class="label" x="772" y="232">3.1.3 Create</text>
+  <text class="label" x="772" y="250">Pending</text>
+  <text class="small" x="771" y="267">booking record</text>
+
+  <rect class="process" x="330" y="345" width="145" height="70" rx="14"/>
+  <text class="label" x="356" y="372">3.2.1 Open</text>
+  <text class="label" x="353" y="390">Payment</text>
+  <text class="small" x="351" y="407">render payment page</text>
+
+  <rect class="process" x="540" y="345" width="145" height="70" rx="14"/>
+  <text class="label" x="561" y="372">3.2.2 Start</text>
+  <text class="label" x="559" y="390">Cashfree</text>
+  <text class="small" x="563" y="407">payment session</text>
+
+  <rect class="process" x="750" y="345" width="145" height="70" rx="14"/>
+  <text class="label" x="774" y="372">3.2.3 Mark</text>
+  <text class="label" x="772" y="390">Confirmed</text>
+  <text class="small" x="777" y="407">paid booking</text>
+
+  <rect class="process" x="435" y="485" width="145" height="70" rx="14"/>
+  <text class="label" x="457" y="512">3.3.1 Build</text>
+  <text class="label" x="468" y="530">Receipt</text>
+  <text class="small" x="460" y="547">PDFKit output</text>
+
+  <rect class="process" x="645" y="485" width="145" height="70" rx="14"/>
+  <text class="label" x="667" y="512">3.3.2 Send</text>
+  <text class="label" x="679" y="530">Email</text>
+  <text class="small" x="671" y="547">attachment/link</text>
+
+  <rect class="section" x="300" y="655" width="620" height="455" rx="14"/>
+  <text class="sectionTitle" x="322" y="686">4.x Verification and Safety Decomposition</text>
+
+  <rect class="process" x="330" y="725" width="145" height="70" rx="14"/>
+  <text class="label" x="355" y="752">4.1.1 Upload</text>
+  <text class="label" x="371" y="770">Docs</text>
+  <text class="small" x="352" y="787">legal documents</text>
+
+  <rect class="process" x="540" y="725" width="145" height="70" rx="14"/>
+  <text class="label" x="558" y="752">4.1.2 Queue</text>
+  <text class="label" x="554" y="770">Review</text>
+  <text class="small" x="557" y="787">pending status</text>
+
+  <rect class="process" x="750" y="725" width="145" height="70" rx="14"/>
+  <text class="label" x="772" y="752">4.1.3 Admin</text>
+  <text class="label" x="766" y="770">Decision</text>
+  <text class="small" x="766" y="787">verify or reject</text>
+
+  <rect class="process" x="330" y="865" width="145" height="70" rx="14"/>
+  <text class="label" x="351" y="892">4.2.1 Create</text>
+  <text class="label" x="349" y="910">Cert PDF</text>
+  <text class="small" x="349" y="927">QR and signature</text>
+
+  <rect class="process" x="540" y="865" width="145" height="70" rx="14"/>
+  <text class="label" x="563" y="892">4.2.2 Store</text>
+  <text class="label" x="562" y="910">Cert URL</text>
+  <text class="small" x="562" y="927">Cloudinary link</text>
+
+  <rect class="process" x="750" y="865" width="145" height="70" rx="14"/>
+  <text class="label" x="770" y="892">4.3.1 Safety</text>
+  <text class="label" x="772" y="910">Refresh</text>
+  <text class="small" x="760" y="927">overdue alerts</text>
+
+  <rect class="process" x="540" y="1005" width="145" height="70" rx="14"/>
+  <text class="label" x="557" y="1032">4.3.2 Alert</text>
+  <text class="label" x="576" y="1050">Admin</text>
+  <text class="small" x="555" y="1067">dispatch status</text>
+
+  <path class="store" d="M1015 185 H1230 C1258 185 1258 275 1230 275 H1015 C1043 275 1043 185 1015 185 Z"/>
+  <text class="label" x="1074" y="222">D2 Listings</text>
+  <text class="small" x="1060" y="244">listing, price, owner</text>
+
+  <path class="store" d="M1015 345 H1230 C1258 345 1258 435 1230 435 H1015 C1043 435 1043 345 1015 345 Z"/>
+  <text class="label" x="1070" y="382">D3 Bookings</text>
+  <text class="small" x="1056" y="404">guest, dates, status</text>
+
+  <path class="store" d="M1015 505 H1230 C1258 505 1258 595 1230 595 H1015 C1043 595 1043 505 1015 505 Z"/>
+  <text class="label" x="1078" y="542">D1 Users</text>
+  <text class="small" x="1059" y="564">guest and owner data</text>
+
+  <path class="store" d="M1015 725 H1230 C1258 725 1258 815 1230 815 H1015 C1043 815 1043 725 1015 725 Z"/>
+  <text class="label" x="1074" y="762">D2 Listings</text>
+  <text class="small" x="1049" y="784">docs, verification status</text>
+
+  <path class="store" d="M1015 890 H1230 C1258 890 1258 980 1230 980 H1015 C1043 980 1043 890 1015 890 Z"/>
+  <text class="label" x="1070" y="927">D3 Bookings</text>
+  <text class="small" x="1050" y="949">stay and safety fields</text>
+
+  <rect class="external" x="1325" y="185" width="175" height="70" rx="8"/>
+  <text class="label" x="1376" y="214">Mapbox</text>
+  <text class="small" x="1356" y="236">route data on form</text>
+
+  <rect class="external" x="1325" y="340" width="175" height="70" rx="8"/>
+  <text class="label" x="1370" y="369">Cashfree</text>
+  <text class="small" x="1357" y="391">order/session API</text>
+
+  <rect class="external" x="1325" y="500" width="175" height="70" rx="8"/>
+  <text class="label" x="1378" y="529">Mailer</text>
+  <text class="small" x="1351" y="551">receipt/cancel mail</text>
+
+  <rect class="external" x="1325" y="725" width="175" height="70" rx="8"/>
+  <text class="label" x="1367" y="754">Cloudinary</text>
+  <text class="small" x="1348" y="776">documents and certs</text>
+
+  <rect class="external" x="1325" y="890" width="175" height="70" rx="8"/>
+  <text class="label" x="1372" y="919">Police API</text>
+  <text class="small" x="1352" y="941">optional dispatch log</text>
+
+  <rect class="external" x="1605" y="725" width="190" height="70" rx="8"/>
+  <text class="label" x="1656" y="754">QR Viewer</text>
+  <text class="small" x="1642" y="776">public verification page</text>
+
+  <line class="flow" x1="230" y1="206" x2="330" y2="240"/>
+  <text class="flowText" x="248" y="205">listing id</text>
+  <line class="flow" x1="475" y1="240" x2="540" y2="240"/>
+  <text class="flowText" x="484" y="226">dates</text>
+  <line class="flow" x1="685" y1="240" x2="750" y2="240"/>
+  <text class="flowText" x="699" y="226">guest form</text>
+  <line class="flow" x1="895" y1="240" x2="1015" y2="390"/>
+  <text class="flowText" x="896" y="335">pending booking</text>
+  <line class="flow" x1="330" y1="240" x2="1015" y2="230"/>
+  <text class="flowText" x="610" y="218">listing details</text>
+  <line class="flow" x1="540" y1="240" x2="1325" y2="220"/>
+  <text class="flowText" x="820" y="212">route info</text>
+
+  <line class="flow" x1="895" y1="380" x2="1015" y2="390"/>
+  <text class="flowText" x="906" y="372">read booking</text>
+  <line class="flow" x1="475" y1="380" x2="540" y2="380"/>
+  <line class="flow" x1="685" y1="380" x2="1325" y2="375"/>
+  <text class="flowText" x="875" y="362">payment session request</text>
+  <line class="flow" x1="1325" y1="375" x2="895" y2="380"/>
+  <text class="flowText" x="1060" y="402">payment result</text>
+  <line class="flow" x1="895" y1="380" x2="1015" y2="390"/>
+
+  <line class="flow" x1="822" y1="415" x2="507" y2="485"/>
+  <text class="flowText" x="575" y="464">confirmed booking</text>
+  <line class="flow" x1="580" y1="520" x2="645" y2="520"/>
+  <line class="flow" x1="790" y1="520" x2="1325" y2="535"/>
+  <text class="flowText" x="950" y="510">receipt email</text>
+  <line class="flow" x1="507" y1="485" x2="1015" y2="550"/>
+  <text class="flowText" x="695" y="500">guest/owner info</text>
+  <line class="flow" x1="507" y1="555" x2="1015" y2="390"/>
+  <text class="flowText" x="700" y="575">receipt download reads</text>
+
+  <line class="flow" x1="230" y1="696" x2="330" y2="760"/>
+  <text class="flowText" x="246" y="702">legal docs</text>
+  <line class="flow" x1="475" y1="760" x2="1325" y2="760"/>
+  <text class="flowText" x="780" y="742">upload docs</text>
+  <line class="flow" x1="475" y1="760" x2="540" y2="760"/>
+  <line class="flow" x1="685" y1="760" x2="1015" y2="770"/>
+  <text class="flowText" x="785" y="752">pending status</text>
+  <line class="flow" x1="230" y1="956" x2="750" y2="760"/>
+  <text class="flowText" x="474" y="850">approve/reject</text>
+  <line class="flow" x1="895" y1="760" x2="1015" y2="770"/>
+  <text class="flowText" x="912" y="744">status and note</text>
+
+  <line class="flow" x1="822" y1="795" x2="402" y2="865"/>
+  <text class="flowText" x="565" y="842">verified listing</text>
+  <line class="flow" x1="475" y1="900" x2="540" y2="900"/>
+  <line class="flow" x1="685" y1="900" x2="1325" y2="760"/>
+  <text class="flowText" x="880" y="852">certificate PDF upload</text>
+  <line class="flow" x1="685" y1="900" x2="1015" y2="770"/>
+  <text class="flowText" x="792" y="900">cert URL and QR target</text>
+  <line class="flow" x1="895" y1="900" x2="1015" y2="935"/>
+  <text class="flowText" x="910" y="927">read checkout</text>
+  <line class="flow" x1="895" y1="900" x2="1325" y2="925"/>
+  <text class="flowText" x="1010" y="918">dispatch request</text>
+  <line class="flow" x1="750" y1="900" x2="612" y2="1005"/>
+  <text class="flowText" x="664" y="972">alert payload</text>
+  <line class="flow" x1="612" y1="1005" x2="230" y2="956"/>
+  <text class="flowText" x="392" y="1012">admin safety alert</text>
+
+  <line class="flow" x1="1230" y1="770" x2="1605" y2="760"/>
+  <text class="flowText" x="1360" y="746">public verification details</text>
+
+  <rect x="300" y="1140" width="1210" height="56" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+  <text class="small" x="330" y="1172">Note: This Level 3 diagram focuses on the most detailed flows present in the codebase: booking/payment/receipt, legal document verification, certificates, QR verification, and safety alerts.</text>
+</svg>

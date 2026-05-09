@@ -1,0 +1,78 @@
+<% layout("layouts/boilerplate") %>
+
+<style>
+  .flash-box {
+    background-color: white;
+    color: #a9d48c;
+    border: 1px solid #98aebe;
+    border-radius: 12px;
+    padding: 15px 25px;
+    text-align: center;
+    width: fit-content;
+    margin: 2.2rem auto 1rem auto;
+    font-weight: 500;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    animation: fadeIn 0.45s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .listing-link { text-decoration: none; color: inherit; }
+  .card { border-radius: 12px; overflow: hidden; transition: 0.3s; }
+  .card:hover { transform: translateY(-5px); box-shadow: 0 8px 18px rgba(0,0,0,0.15); }
+</style>
+
+<!-- Search Header -->
+<div class="flash-box">
+  <i class="fa-solid fa-magnifying-glass" style="margin-right:8px;"></i>
+  Search Results For "<%= q || category || 'Results' %>"
+</div>
+
+<!-- Results Grid -->
+<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-4">
+
+  <% if (listings.length === 0) { %>
+    <div class="flash-box">
+      <i class="fa-solid fa-circle-info" style="margin-right:8px;"></i>
+      No Listings Found For "<%= q || category || 'your search' %>".
+    </div>
+  <% } %>
+
+  <% listings.forEach(listing => { %>
+
+    <% 
+      // Correct first image logic
+      const firstImg =
+        listing.images?.[0]?.url || 
+        listing.image?.url || 
+        "/images/default.jpg";
+    %>
+
+    <a href="/listings/<%= listing._id %>" class="listing-link">
+      <div class="card col mb-4">
+
+        <!-- Correct image placement -->
+        <img 
+          src="<%= firstImg %>"
+          class="card-img-top"
+          alt="Listing image"
+          style="height:20rem; object-fit:cover;"
+        />
+
+        <div class="card-body">
+          <p class="card-text">
+            <b><%= listing.title %></b><br/>
+            ₹<%= listing.price.toLocaleString('en-IN') %> / night
+          </p>
+        </div>
+
+      </div>
+    </a>
+
+  <% }) %>
+
+</div>

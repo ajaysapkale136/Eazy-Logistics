@@ -1,0 +1,228 @@
+<% layout("admin/layouts/admin-boilerplate") %>
+
+<div class="panel glass">
+  <div class="panel-head">
+    <h4>Manage Users</h4>
+    <div>
+      <input id="usersSearch" placeholder="Search username or email..." />
+      <button id="btnCreateAdminInvite" class="btn">Create Admin Permission Code</button>
+      <button id="btnReloadUsers" class="btn ghost">Reload</button>
+    </div>
+  </div>
+  <div id="adminInviteResult" style="display:none; margin: 0 0 12px; padding:10px 12px; border:1px solid #d1fae5; background:#ecfdf5; color:#065f46; border-radius:10px; font-size:13px;"></div>
+
+  <div class="panel-body">
+    <table id="usersTable" class="admin-table" style="width:100%">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Security</th>
+          <th>Face Auth</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody></tbody>
+    </table>
+
+    <div id="usersPagination" class="pagination-box"></div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const tbody = document.querySelector("#usersTable tbody");
+  const search = document.getElementById("usersSearch");
+  const btnReload = document.getElementById("btnReloadUsers");
+  const btnCreateInvite = document.getElementById("btnCreateAdminInvite");
+  const inviteResult = document.getElementById("adminInviteResult");
+
+  let page = 1;
+  const limit = 12;
+
+  async function loadUsers() {
+    const q = encodeURIComponent(search.value || "");
+    const res = await fetch(`/admin/api/users?page=${page}&limit=${limit}&q=${q}`);
+    const data = await res.json();
+
+    tbody.innerHTML = data.users.map((u) => `
+      <tr>
+        <td>${escapeHtml(u.username)}</td>
+        <td>${escapeHtml(u.email)}</td>
+        <td>
+          ${escapeHtml(u.role || "user")}
+          ${u.isMainAdmin ? '<div style="font-size:11px; color:#2563eb;">Main admin</div>' : ""}
+        </td>
+        <td>
+          ${u.role === "admin"
+            ? (u.isMainAdmin
+              ? '<span class="badge success">Bypass (main admin)</span>'
+              : (u.adminSecurity?.codeLastFour
+                ? `<span class="badge warning">12-digit code ••••${u.adminSecurity.codeLastFour}</span>`
+                : '<span class="badge">Missing code</span>'))
+            : '<span class="badge">User only</span>'}
+        </td>
+        <td>${Array.isArray(u.passkeys) ? u.passkeys.length : 0}</td>
+        <td>
+          ${u.role === "admin"
+            ? `<button class="btn ghost" onclick="changeRole('${u._id}', 'user')">Demote</button>`
+            : `<button class="btn ghost" onclick="changeRole('${u._id}', 'admin')">Promote</button>`}
+          ${u.role === "admin" && !u.isMainAdmin
+            ? `<button class="btn ghost" onclick="sendSecurityCode('${u._id}')">Send Code</button>`
+            : ""}
+          <button class="btn danger" onclick="deleteUser('${u._id}')">Delete</button>
+        </td>
+      </tr>
+    `).join("");
+
+    buildPagination(data.total);
+  }
+
+  function buildPagination(total) {
+    const totalPages = Math.ceil(total / limit);
+    const container = document.getElementById("usersPagination");
+    let html = "";
+
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button class="btn ghost ${i === page ? "active" : ""}" data-page="${i}">${i}</button>`;
+    }
+
+    container.innerHTML = html;
+    container.querySelectorAll("button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        page = Number(btn.dataset.page);
+        loadUsers();
+      });
+    });
+  }
+
+  window.changeRole = async (id, role) => {
+    if (!confirm(`Are you sure you want to set role: ${role}?`)) return;
+
+    const res = await fetch(`/admin/api/users/${id}/role`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role }),
+    });
+    const data = await res.json();
+
+    if (!data.ok) {
+      alert(data.error || "Could not update role.");
+      return;
+    }
+
+    if (role === "admin" && data.securityCodeSent) {
+      alert("User promoted to admin and a 12-digit code was sent to their email.");
+    }
+
+    loadUsers();
+  };
+
+  window.sendSecurityCode = async (id) => {
+    if (!confirm("Generate and email a fresh 12-digit admin code?")) return;
+
+    const res = await fetch(`/admin/api/users/${id}/security-code`, { method: "POST" });
+    const data = await res.json();
+
+    if (!data.ok) {
+      alert(data.error || "Could not send security code.");
+      return;
+    }
+
+    alert("A fresh admin security code was sent.");
+    loadUsers();
+  };
+
+  window.deleteUser = async (id) => {
+    if (!confirm("Delete user permanently? This cannot be undone.")) return;
+
+    const res = await fetch(`/admin/api/users/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      alert("User removed.");
+      loadUsers();
+    } else {
+      alert("Delete failed.");
+    }
+  };
+
+  search.addEventListener("input", debounce(() => {
+    page = 1;
+    loadUsers();
+  }, 300));
+
+  btnReload.addEventListener("click", () => loadUsers());
+  btnCreateInvite.addEventListener("click", async () => {
+    if (!confirm("Generate one-time admin permission code for new admin signup?")) return;
+
+    btnCreateInvite.disabled = true;
+    const originalText = btnCreateInvite.innerText;
+    btnCreateInvite.innerText = "Generating...";
+
+    try {
+      const res = await fetch("/admin/api/admin-invites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ttlMinutes: 30 }),
+      });
+      const data = await res.json();
+
+      if (!data.ok || !data.inviteCode) {
+        alert(data.error || "Could not create admin permission code.");
+        return;
+      }
+
+      const expiresText = data.expiresAt
+        ? new Date(data.expiresAt).toLocaleString("en-IN")
+        : "soon";
+
+      inviteResult.style.display = "block";
+      inviteResult.innerHTML = `
+        <strong>New Admin Permission Code:</strong>
+        <span style="font-size:16px; letter-spacing:1px; margin-left:6px;">${escapeHtml(data.inviteCode)}</span>
+        <button id="copyInviteCodeBtn" class="btn ghost" style="margin-left:8px; padding:4px 8px;">Copy</button>
+        <div style="margin-top:4px;">Expires: ${escapeHtml(expiresText)}</div>
+      `;
+
+      const copyBtn = document.getElementById("copyInviteCodeBtn");
+      copyBtn?.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(String(data.inviteCode));
+          copyBtn.innerText = "Copied";
+          setTimeout(() => {
+            copyBtn.innerText = "Copy";
+          }, 1200);
+        } catch (_error) {
+          alert("Copy failed. Please copy manually.");
+        }
+      });
+    } catch (_error) {
+      alert("Could not create admin permission code.");
+    } finally {
+      btnCreateInvite.disabled = false;
+      btnCreateInvite.innerText = originalText;
+    }
+  });
+  loadUsers();
+
+  function escapeHtml(value = "") {
+    return String(value).replace(/[&<>"'`]/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+      "`": "&#96;"
+    }[char]));
+  }
+
+  function debounce(fn, delay = 300) {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), delay);
+    };
+  }
+});
+</script>

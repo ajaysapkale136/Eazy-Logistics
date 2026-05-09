@@ -1,0 +1,129 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin • Eazy-Logistics</title>
+
+  <!-- Fonts + icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <!-- Admin stylesheet -->
+  <link rel="stylesheet" href="/css/admin.css">
+
+  <!-- Chart.js (v4 compatible) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="admin-airbnb">
+
+  <div class="admin-wrap">
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar">
+      <div class="brand">
+        <div class="logo">Eazy<span>Admin</span></div>
+      </div>
+
+      <nav class="nav-list">
+        <a href="/admin" class="nav-item" aria-current="page"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+        <a href="/admin/listings" class="nav-item"><i class="fa fa-house"></i> Listings</a>
+        <a href="/admin/users" class="nav-item"><i class="fa fa-users"></i> Users</a>
+        <a href="/admin/bookings" class="nav-item"><i class="fa fa-calendar-check"></i> Bookings</a>
+        <a href="/logout" class="nav-item"><i class="fa fa-right-from-bracket"></i> Logout</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <small>v1.0 • Eazy-Logistics</small>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="admin-main">
+      <header class="admin-topbar">
+        <div class="search-box">
+          <input type="text" id="adminSearchInput" placeholder="Search listings, users, bookings...">
+          <button class="btn-ghost"><i class="fa fa-magnifying-glass"></i></button>
+          <div id="searchResults" class="search-dropdown"></div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="notif-btn" title="Notifications">
+            <i class="fa fa-bell"></i><span class="badge">3</span>
+          </div>
+          <div class="profile">
+            <img src="<%= currUser?.profileImage?.url || '/images/default-avatar.png' %>" alt="avatar" />
+            <span class="name"><%= currUser?.username || 'Admin' %></span>
+          </div>
+        </div>
+      </header>
+
+      <section class="admin-container">
+        <%- body %>
+      </section>
+    </main>
+  </div>
+
+  <!-- Admin scripts -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/admin-ui.js"></script>
+  <script src="/js/admin-charts.js"></script>
+  <script src="/js/admin-search.js"></script>
+
+</body>
+</html>
+
+
+<style>
+
+  /* -- SEARCH BUTTON STYLING -- */
+
+/* 1. Ensure the parent holds the absolute button */
+.search-box {
+  position: relative; 
+  display: flex;
+  align-items: center;
+}
+
+/* 2. Style the input to make room for the button */
+.search-box input {
+  padding-right: 48px; /* Prevents text from typing over the button */
+}
+
+/* 3. The Button Styles */
+.search-box .btn-ghost {
+  position: absolute;
+  right: 12px; /* Sits 12px from the right edge */
+  top: 50%;
+  transform: translateY(-50%); /* Centers it vertically */
+  
+  background: transparent;
+  border: none;
+  color: var(--text-muted); /* Grey by default */
+  
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  z-index: 10;
+}
+
+/* 4. Hover Effects */
+.search-box .btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.8); /* White glow on hover */
+  color: var(--primary); /* Turns blue */
+  transform: translateY(-50%) scale(1.1); /* Subtle zoom */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* 5. Active/Click Effect */
+.search-box .btn-ghost:active {
+  transform: translateY(-50%) scale(0.95);
+}
+</style>

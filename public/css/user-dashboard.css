@@ -1,0 +1,351 @@
+/* public/css/dashboard-pro.css */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg-body: #f3f5f8;        
+  --bg-card: #ffffff;        
+  --text-main: #111827;      
+  --text-muted: #6b7280;     
+  --brand-color: #f43f5e;    /* Premium Red/Pink */
+  --brand-dark: #e11d48;     /* Darker Red */
+  --border-color: #e5e7eb;   
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.03), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  --shadow-red: 0 4px 12px rgba(244, 63, 94, 0.4); /* Glow for red buttons */
+
+  --radius: 16px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  background-color: var(--bg-body);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--text-main);
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* ================= LAYOUT ================= */
+.dashboard-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 30px;
+  display: grid;
+  grid-template-columns: 280px 1fr 340px; 
+  gap: 30px;
+  min-height: 95vh;
+}
+
+/* ================= CARDS & PANELS ================= */
+.glass-card, .stat-box, .chart-container, .table-container, .side-panel, .header-card, .data-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  transition: var(--transition);
+}
+
+.glass-card:hover, .stat-box:hover, .chart-container:hover, .side-panel:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+  border-color: #d1d5db;
+}
+
+/* ================= LEFT SIDEBAR ================= */
+.sidebar {
+  position: sticky;
+  top: 30px;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profile-section { text-align: center; }
+.profile-img {
+  width: 90px; height: 90px; border-radius: 50%; object-fit: cover;
+  border: 4px solid var(--bg-body); box-shadow: 0 0 0 2px var(--brand-color);
+  margin-bottom: 15px; transition: var(--transition);
+}
+.profile-section:hover .profile-img { transform: scale(1.05); }
+
+.nav-menu { padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+
+/* Sidebar Buttons */
+.nav-link, .nav-item {
+  display: flex; align-items: center; gap: 15px;
+  padding: 14px 18px; border-radius: 12px;
+  text-decoration: none; color: var(--text-muted);
+  font-weight: 600; font-size: 14px; transition: var(--transition);
+  position: relative; overflow: hidden;
+}
+
+/* Dark Red Hover Effect */
+.nav-link:hover, .nav-item:hover, .nav-link.active, .nav-item.active {
+  background: linear-gradient(135deg, var(--brand-color) 0%, #e11d48 100%);
+  color: white;
+  padding-left: 24px;
+  box-shadow: var(--shadow-red);
+  transform: translateY(-2px);
+}
+
+.nav-link.active::before, .nav-item.active::before { display: none; }
+
+.nav-link.danger:hover, .nav-item[href*="logout"]:hover {
+  background: #f43f5e; color: #f43f5e; box-shadow: none; transform: none;
+}
+
+/* ================= STATS ROW ================= */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.stat-box { display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden; }
+.stat-box::after {
+  content: ''; position: absolute; right: -20px; top: -20px;
+  width: 80px; height: 80px; background: linear-gradient(135deg, rgba(244, 63, 94, 0.1), transparent);
+  border-radius: 50%; transition: var(--transition);
+}
+.stat-box:hover::after { transform: scale(1.2); }
+.stat-label { font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 8px; }
+.stat-value { font-size: 32px; font-weight: 800; color: var(--text-main); line-height: 1; }
+
+/* ================= CHART SECTION (UPDATED SPACING) ================= */
+.chart-container {
+  min-height: 480px; /* Increased height */
+  /* ✅ ADDED EXTRA PADDING TOP AND BOTTOM HERE */
+  padding-top: 50px; 
+  padding-bottom: 50px;
+  padding-left: 30px;
+  padding-right: 30px;
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* ✅ ADDED SPACE BELOW HEADER */
+  margin-bottom: 40px; 
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.chart-header h4 {
+  margin: 0;
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--text-main);
+  letter-spacing: -0.5px;
+}
+
+.chart-select {
+  padding: 8px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  box-shadow: var(--shadow-sm);
+}
+.chart-select:hover, .chart-select:focus {
+  border-color: var(--brand-color);
+  color: var(--brand-color);
+  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1);
+}
+
+/* Canvas Wrapper */
+.chart-wrapper {
+  flex-grow: 1;
+  position: relative;
+  width: 100%;
+  height: 350px !important;
+}
+
+/* ================= TABLES ================= */
+.table-container, .data-card { padding: 0; overflow: hidden; }
+.table-header, .card-header { padding: 20px 24px; border-bottom: 1px solid var(--border-color); background: #fdfdfd; font-weight: 700; font-size: 16px; }
+
+.custom-table { width: 100%; border-collapse: collapse; }
+.custom-table th { padding: 16px 24px; text-align: left; font-size: 11px; text-transform: uppercase; color: var(--text-muted); background: #f9fafb; font-weight: 700; }
+.custom-table td { padding: 16px 24px; border-bottom: 1px solid #f3f4f6; font-size: 14px; vertical-align: middle; }
+.status-badge { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.bg-success { background: #ecfdf5; color: #059669; }
+.bg-danger { background: #fef2f2; color: #dc2626; }
+
+/* ================= RIGHT SIDEBAR ================= */
+.right-sidebar { display: flex; flex-direction: column; gap: 25px; }
+.list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px dashed var(--border-color); transition: var(--transition); }
+.list-item:hover { transform: translateX(5px); }
+.list-item:last-child { border-bottom: none; }
+.list-text h5 { margin: 0; font-size: 14px; font-weight: 600; }
+.list-text p { margin: 4px 0 0; font-size: 12px; color: var(--text-muted); }
+.list-price { font-size: 13px; font-weight: 700; color: var(--brand-color); }
+
+/* ================= BUTTONS ================= */
+.btn-primary-block, .action-btn {
+  display: block; width: 100%; padding: 14px;
+  background: linear-gradient(135deg, var(--brand-color) 0%, #e11d48 100%);
+  color: white; text-align: center; border-radius: 12px;
+  text-decoration: none; font-weight: 700; font-size: 14px; border: none;
+  box-shadow: var(--shadow-red);
+  transition: var(--transition); position: relative; overflow: hidden;
+}
+
+.btn-ghost {
+  display: block; width: 100%; padding: 14px; margin-top: 10px;
+  background: white; border: 1px solid var(--border-color);
+  color: var(--text-main); text-align: center; border-radius: 12px;
+  text-decoration: none; font-weight: 700; font-size: 14px;
+  transition: var(--transition); position: relative; overflow: hidden;
+}
+
+.btn-primary-block:hover, .action-btn:hover, .btn-ghost:hover {
+  transform: translateY(-3px);
+  background: linear-gradient(135deg, var(--brand-color) 0%, #e11d48 100%);
+  color: white; border-color: transparent;
+  box-shadow: 0 10px 20px rgba(244, 63, 94, 0.4);
+}
+
+.nav-link:hover::after, .btn-primary-block:hover::after, .action-btn:hover::after, .btn-ghost:hover::after {
+  content: ""; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shine 0.5s forwards;
+}
+
+@keyframes shine { to { left: 100%; } }
+
+@media (max-width: 1200px) {
+  .dashboard-container { grid-template-columns: 250px 1fr; }
+  .right-sidebar { display: none; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+
+
+/* ================= STATUS BADGES (FIXED VISIBILITY) ================= */
+
+.status-badge {
+  padding: 6px 14px;         /* Little more padding for better look */
+  border-radius: 50px;       /* Pill shape */
+  font-size: 11px;
+  font-weight: 800;          /* Bold text */
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  display: inline-block;
+  text-align: center;
+  min-width: 80px;           /* Ensures all badges have a consistent width */
+  box-shadow: none;          /* Remove any shadow that might darken it */
+}
+
+/* 1. CONFIRMED (Green) - Light Green BG / Dark Green Text */
+.bg-success {
+  background-color: #dcfce7 !important;  /* Very Light Green */
+  color: #15803d !important;             /* Deep Green Text */
+  border: 1px solid #bbf7d0;             /* Subtle Border */
+}
+
+/* 2. CANCELLED / REFUNDED (Red) - Light Red BG / Dark Red Text */
+.bg-danger {
+  background-color: #fee2e2 !important;  /* Very Light Red */
+  color: #b91c1c !important;             /* Deep Red Text */
+  border: 1px solid #fecaca;
+}
+
+/* 3. PENDING (Yellow/Orange) - Light Yellow BG / Dark Orange Text */
+.bg-pending {
+  background-color: #fef9c3 !important;  /* Very Light Yellow */
+  color: #a16207 !important;             /* Deep Orange/Brown Text */
+  border: 1px solid #fde047;
+}
+
+/* Optional: Hover effect for interactive badges */
+.status-badge:hover {
+  filter: brightness(0.95);
+}
+
+/* ================= UPCOMING BOOKINGS (Admin Style) ================= */
+.upcoming-card {
+  padding: 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  border: 1px solid #e5e7eb;
+}
+
+.upcoming-header {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.booking-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6; /* Subtle separator like Admin */
+  transition: all 0.2s ease;
+}
+
+.booking-item:last-child {
+  border-bottom: none;
+}
+
+.booking-item:hover {
+  background-color: #f9fafb; /* Slight hover effect */
+  padding-left: 5px;         /* Subtle movement */
+  padding-right: 5px;
+  border-radius: 6px;
+}
+
+.booking-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.booking-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px; /* Prevents long titles from breaking layout */
+}
+
+.booking-meta {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.booking-price {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111;
+}
+
+.view-all-link {
+  display: block;
+  margin-top: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f43f5e; /* Brand Color */
+  text-decoration: none;
+  text-align: center;
+}
+.view-all-link:hover { text-decoration: underline; }
+

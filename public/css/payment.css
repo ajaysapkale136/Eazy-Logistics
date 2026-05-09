@@ -1,0 +1,409 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+    /* 🔴 EAZY-LOGISTICS BRAND COLORS */
+    --primary: #a91b0d;       /* Deep Red / Maroon */
+    --primary-hover: #801309; /* Darker Red for hover */
+    --accent-light: #fff5f5;  /* Very light red tint for backgrounds */
+    
+    --text-dark: #1a1a1a;
+    --text-light: #666666;
+    --border: #e0e0e0;
+    --bg-page: #f2f4f7;       /* Clean Light Grey Background */
+}
+
+/* --- LAYOUT & BACKGROUND --- */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg-page);
+    color: var(--text-dark);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.payment-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    padding: 40px 20px;
+}
+
+/* 🟢 HORIZONTAL LAYOUT CONTAINER */
+.payment-container {
+    display: flex;
+    flex-direction: row; /* Forces Horizontal Layout */
+    justify-content: center;
+    align-items: flex-start; /* Aligns tops of cards */
+    gap: 40px; /* Space between the two cards */
+    flex-wrap: wrap; /* Allows stacking only on very small screens */
+}
+
+/* --- COMMON CARD STYLES (Applies to both Left & Right cards) --- */
+.payment-selection, 
+.payment-form-area {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    border: 1px solid white;
+    
+    /* ✨ HOVER EFFECT SETTINGS ✨ */
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* ✨ THE HOVER ANIMATION ✨ */
+.payment-selection:hover, 
+.payment-form-area:hover {
+    transform: translateY(-10px); /* Lifts the card up */
+    box-shadow: 0 25px 50px rgba(0,0,0,0.1); /* Adds deep shadow */
+    border-color: rgba(169, 27, 13, 0.1); /* Subtle red border glow */
+}
+
+/* --- LEFT CARD: SELECTION --- */
+.payment-selection {
+    flex: 1.2; /* Takes up slightly more space */
+    min-width: 350px;
+    max-width: 550px;
+}
+
+.header-nav {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.payment-selection h1 {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0 0 30px 0;
+    color: var(--text-dark);
+}
+
+/* Method Options (The inner cards) */
+.method-option {
+    display: flex;
+    align-items: center;
+    padding: 18px 24px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    cursor: pointer;
+    background: #ffffff;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.method-option:hover {
+    border-color: var(--primary);
+    background: var(--accent-light);
+}
+
+.method-option.active {
+    border-color: var(--primary);
+    background: var(--accent-light);
+    border-left: 5px solid var(--primary);
+}
+
+.method-icon img {
+    width: 32px;
+    margin-right: 15px;
+}
+
+.method-details { flex: 1; }
+
+.method-number {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.method-expiry {
+    display: block;
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 4px;
+}
+
+/* Check Circle */
+.check-circle {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    position: relative;
+}
+.method-option.active .check-circle {
+    border-color: var(--primary);
+    background: var(--primary);
+}
+.method-option.active .check-circle::after {
+    content: '✔';
+    font-size: 10px; color: white;
+    position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+}
+
+.add-new {
+    border-style: dashed;
+    justify-content: center;
+    color: var(--text-light);
+}
+
+.total-display {
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+}
+.total-display h2 { margin: 0; font-size: 26px; font-weight: 800; color: var(--primary); }
+
+
+/* --- RIGHT CARD: FORM AREA --- */
+.payment-form-area {
+    flex: 1;
+    min-width: 320px;
+    max-width: 450px;
+    background: #ffffff;
+}
+
+/* Card Preview (Purple/Blue Gradient) */
+.credit-card-preview {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    position: relative;
+    box-shadow: 0 15px 35px rgba(30, 60, 114, 0.25);
+    height: 140px;
+    display: flex; flex-direction: column; justify-content: space-between;
+}
+
+.card-logo-right {
+    position: absolute; top: 25px; right: 25px;
+    font-weight: 800; font-size: 18px; font-style: italic; opacity: 0.9;
+}
+.card-text-number {
+    font-family: 'Courier New', monospace;
+    font-size: 20px; letter-spacing: 2px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Inputs */
+.input-group { margin-bottom: 15px; }
+.input-group label {
+    display: block; font-size: 12px; font-weight: 700;
+    color: var(--text-light); margin-bottom: 6px;
+}
+
+.styled-input {
+    width: 100%; padding: 12px 14px;
+    border-radius: 8px; border: 1px solid var(--border);
+    background: #f9f9f9; font-size: 14px; color: #333;
+    box-sizing: border-box; transition: all 0.2s;
+}
+.styled-input:focus {
+    outline: none; border-color: var(--primary); background: white;
+}
+
+.row-inputs { display: flex; gap: 15px; }
+
+/* Buttons */
+.button-container { display: flex; gap: 15px; margin-top: 25px; }
+
+.cancel-btn {
+    flex: 1; padding: 14px;
+    background: white; border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text-light); font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+}
+.cancel-btn:hover { background: #f0f0f0; color: #333; }
+
+.submit-btn {
+    flex: 2; padding: 14px;
+    background: linear-gradient(135deg, var(--primary) 0%, #801309 100%);
+    border: none; border-radius: 10px;
+    color: white; font-weight: 700; font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(169, 27, 13, 0.3);
+    transition: all 0.3s;
+}
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(169, 27, 13, 0.4);
+}
+
+.secure-note {
+    text-align: center; font-size: 11px; color: #888;
+    margin-top: 20px; display: flex;
+    align-items: center; justify-content: center; gap: 6px;
+}
+
+/* Mobile Responsive: Stack them on small screens */
+@media (max-width: 850px) {
+    .payment-container {
+        flex-direction: column; /* Stack vertically */
+        align-items: center;
+    }
+    .payment-selection, .payment-form-area {
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 20px;
+    }
+}
+/* ... (Keep your existing CSS) ... */
+
+/* ===========================
+   UPI & QR CODE STYLES 
+   (Add this to payment.css)
+=========================== */
+
+/* QR Code Box */
+.qr-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 25px;
+}
+
+.qr-box {
+    background: #fff;
+    border: 2px dashed #ddd; /* Dashed border like screenshot */
+    padding: 15px;
+    border-radius: 16px;
+    text-align: center;
+    width: 100%;
+    max-width: 200px;
+}
+
+.qr-box img {
+    width: 150px;
+    height: 150px;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto;
+}
+
+.qr-box p {
+    font-size: 11px;
+    color: #888;
+    margin: 10px 0 0 0;
+    font-weight: 600;
+}
+
+/* "Or pay with" Label */
+.section-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #666;
+    margin-bottom: 12px;
+    display: block;
+}
+/* 
+/* UPI Apps Grid (4 Items) */
+.upi-apps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.upi-app {
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 12px 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.upi-app:hover {
+    border-color: var(--primary);
+    background: var(--accent-light);
+    transform: translateY(-2px);
+}
+
+.upi-app img {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 6px;
+    object-fit: contain;
+}
+
+.upi-app span {
+    font-size: 11px;
+    font-weight: 600;
+    color: #333;
+} 
+
+/* --- METHOD OPTION STYLES --- */
+
+.method-option {
+    display: flex;
+    align-items: center;
+    padding: 18px 24px;
+    /* Default Grey Border */
+    border: 1px solid #e0e0e0; 
+    border-radius: 12px;
+    margin-bottom: 16px;
+    cursor: pointer;
+    background: #ffffff;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+}
+
+.method-option:hover {
+    border-color: #a91b0d; /* Hover Red */
+    background: #fff5f5;   /* Light Hover Tint */
+}
+
+/* ✨ SELECTED STATE (Matches your Screenshot) ✨ */
+.method-option.active {
+    /* Full Red Border */
+    border: 2px solid #a91b0d; 
+    /* Light Red Background */
+    background: #fff5f5;       
+    /* Remove the previous left-border style if present */
+    border-left: 2px solid #a91b0d; 
+    box-shadow: 0 4px 12px rgba(169, 27, 13, 0.08);
+}
+
+/* The Check Circle Container */
+.method-check {
+    margin-left: auto; /* Pushes checkmark to the far right */
+}
+
+/* The Circle Itself */
+.check-circle {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid #ddd; /* Default Grey Ring */
+    position: relative;
+    transition: all 0.2s;
+}
+
+/* Selected Circle (Solid Red) */
+.method-option.active .check-circle {
+    background: #a91b0d;
+    border-color: #a91b0d;
+}
+
+/* The White Tick Mark */
+.method-option.active .check-circle::after {
+    content: '✔';
+    font-size: 12px;
+    color: white;
+    font-weight: 700;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}

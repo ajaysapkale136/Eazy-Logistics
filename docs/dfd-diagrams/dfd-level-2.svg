@@ -1,0 +1,221 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200" viewBox="0 0 1800 1200" role="img" aria-labelledby="title desc">
+  <title id="title">DFD Level 2 - Eazy Logistics Project</title>
+  <desc id="desc">Level 2 data flow diagram expanding authentication, listing, booking, review, and admin processes.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M2 2 L10 6 L2 10 Z" fill="#334155"/>
+    </marker>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .bg{fill:#f8fafc}
+      .title{font:700 34px Arial,Helvetica,sans-serif;fill:#0f172a}
+      .subtitle{font:400 16px Arial,Helvetica,sans-serif;fill:#475569}
+      .group{fill:#ffffff;stroke:#cbd5e1;stroke-width:2}
+      .groupTitle{font:700 18px Arial,Helvetica,sans-serif;fill:#0f172a}
+      .process{fill:#e0f2fe;stroke:#0369a1;stroke-width:2;filter:url(#softShadow)}
+      .entity{fill:#fff7ed;stroke:#c2410c;stroke-width:2;filter:url(#softShadow)}
+      .store{fill:#ecfdf5;stroke:#047857;stroke-width:2;filter:url(#softShadow)}
+      .external{fill:#f5f3ff;stroke:#6d28d9;stroke-width:2;filter:url(#softShadow)}
+      .label{font:700 14px Arial,Helvetica,sans-serif;fill:#0f172a}
+      .small{font:400 12px Arial,Helvetica,sans-serif;fill:#334155}
+      .flow{fill:none;stroke:#334155;stroke-width:2;marker-end:url(#arrow)}
+      .flowLight{fill:none;stroke:#64748b;stroke-width:1.8;marker-end:url(#arrow)}
+      .flowText{font:600 11px Arial,Helvetica,sans-serif;fill:#334155}
+    </style>
+  </defs>
+
+  <rect class="bg" width="1800" height="1200"/>
+  <text class="title" x="60" y="62">DFD Level 2 - Eazy Logistics Project</text>
+  <text class="subtitle" x="60" y="90">Expanded flow for each major module in the project: auth, listings, bookings, reviews, and admin operations.</text>
+
+  <rect class="entity" x="60" y="170" width="170" height="70" rx="8"/>
+  <text class="label" x="103" y="200">Guest / User</text>
+  <text class="small" x="96" y="222">browse, book, review</text>
+
+  <rect class="entity" x="60" y="475" width="170" height="70" rx="8"/>
+  <text class="label" x="122" y="505">Host</text>
+  <text class="small" x="92" y="527">uploads property data</text>
+
+  <rect class="entity" x="60" y="790" width="170" height="70" rx="8"/>
+  <text class="label" x="119" y="820">Admin</text>
+  <text class="small" x="93" y="842">controls and reports</text>
+
+  <rect class="group" x="300" y="135" width="370" height="245" rx="14"/>
+  <text class="groupTitle" x="322" y="166">1.0 Auth and Profile</text>
+  <rect class="process" x="330" y="190" width="135" height="64" rx="14"/>
+  <text class="label" x="361" y="216">1.1 Signup</text>
+  <text class="small" x="346" y="236">validate account</text>
+  <rect class="process" x="500" y="190" width="135" height="64" rx="14"/>
+  <text class="label" x="534" y="216">1.2 Login</text>
+  <text class="small" x="520" y="236">local/social</text>
+  <rect class="process" x="330" y="285" width="135" height="64" rx="14"/>
+  <text class="label" x="344" y="311">1.3 Passkeys</text>
+  <text class="small" x="342" y="331">face/device auth</text>
+  <rect class="process" x="500" y="285" width="135" height="64" rx="14"/>
+  <text class="label" x="519" y="311">1.4 Profile</text>
+  <text class="small" x="522" y="331">settings/image</text>
+
+  <rect class="group" x="300" y="430" width="370" height="265" rx="14"/>
+  <text class="groupTitle" x="322" y="461">2.0 Listing Management</text>
+  <rect class="process" x="330" y="485" width="135" height="64" rx="14"/>
+  <text class="label" x="343" y="511">2.1 Create/Edit</text>
+  <text class="small" x="342" y="531">property form</text>
+  <rect class="process" x="500" y="485" width="135" height="64" rx="14"/>
+  <text class="label" x="524" y="511">2.2 Upload</text>
+  <text class="small" x="514" y="531">images/docs</text>
+  <rect class="process" x="330" y="585" width="135" height="64" rx="14"/>
+  <text class="label" x="342" y="611">2.3 Geocode</text>
+  <text class="small" x="345" y="631">map location</text>
+  <rect class="process" x="500" y="585" width="135" height="64" rx="14"/>
+  <text class="label" x="519" y="611">2.4 Search</text>
+  <text class="small" x="510" y="631">filters/nearby</text>
+
+  <rect class="group" x="300" y="745" width="370" height="285" rx="14"/>
+  <text class="groupTitle" x="322" y="776">3.0 Booking and Payment</text>
+  <rect class="process" x="330" y="800" width="135" height="64" rx="14"/>
+  <text class="label" x="346" y="826">3.1 Confirm</text>
+  <text class="small" x="344" y="846">guest details</text>
+  <rect class="process" x="500" y="800" width="135" height="64" rx="14"/>
+  <text class="label" x="530" y="826">3.2 Pay</text>
+  <text class="small" x="522" y="846">Cashfree</text>
+  <rect class="process" x="330" y="900" width="135" height="64" rx="14"/>
+  <text class="label" x="342" y="926">3.3 Receipt</text>
+  <text class="small" x="344" y="946">PDF/email</text>
+  <rect class="process" x="500" y="900" width="135" height="64" rx="14"/>
+  <text class="label" x="518" y="926">3.4 Safety</text>
+  <text class="small" x="516" y="946">stay status</text>
+
+  <rect class="group" x="760" y="250" width="380" height="300" rx="14"/>
+  <text class="groupTitle" x="782" y="281">4.0 Reviews and Verification</text>
+  <rect class="process" x="790" y="310" width="145" height="66" rx="14"/>
+  <text class="label" x="812" y="336">4.1 Add Review</text>
+  <text class="small" x="812" y="356">rating/comment</text>
+  <rect class="process" x="970" y="310" width="145" height="66" rx="14"/>
+  <text class="label" x="986" y="336">4.2 Edit/Delete</text>
+  <text class="small" x="1008" y="356">ownership</text>
+  <rect class="process" x="790" y="425" width="145" height="66" rx="14"/>
+  <text class="label" x="801" y="451">4.3 Verify Docs</text>
+  <text class="small" x="805" y="471">admin decision</text>
+  <rect class="process" x="970" y="425" width="145" height="66" rx="14"/>
+  <text class="label" x="984" y="451">4.4 Certificate</text>
+  <text class="small" x="991" y="471">PDF and QR</text>
+
+  <rect class="group" x="760" y="650" width="380" height="320" rx="14"/>
+  <text class="groupTitle" x="782" y="681">5.0 Admin Operations</text>
+  <rect class="process" x="790" y="710" width="145" height="66" rx="14"/>
+  <text class="label" x="813" y="736">5.1 Summary</text>
+  <text class="small" x="804" y="756">counts/revenue</text>
+  <rect class="process" x="970" y="710" width="145" height="66" rx="14"/>
+  <text class="label" x="990" y="736">5.2 Manage</text>
+  <text class="small" x="987" y="756">users/listings</text>
+  <rect class="process" x="790" y="830" width="145" height="66" rx="14"/>
+  <text class="label" x="807" y="856">5.3 Bookings</text>
+  <text class="small" x="802" y="876">approve/cancel</text>
+  <rect class="process" x="970" y="830" width="145" height="66" rx="14"/>
+  <text class="label" x="993" y="856">5.4 Reports</text>
+  <text class="small" x="997" y="876">CSV/PDF</text>
+
+  <path class="store" d="M1250 150 H1470 C1498 150 1498 245 1470 245 H1250 C1278 245 1278 150 1250 150 Z"/>
+  <text class="label" x="1322" y="190">D1 Users</text>
+  <text class="small" x="1296" y="212">roles, security, profile</text>
+
+  <path class="store" d="M1250 310 H1470 C1498 310 1498 405 1470 405 H1250 C1278 405 1278 310 1250 310 Z"/>
+  <text class="label" x="1308" y="350">D2 Listings</text>
+  <text class="small" x="1294" y="372">properties, docs, status</text>
+
+  <path class="store" d="M1250 470 H1470 C1498 470 1498 565 1470 565 H1250 C1278 565 1278 470 1250 470 Z"/>
+  <text class="label" x="1305" y="510">D3 Bookings</text>
+  <text class="small" x="1294" y="532">dates, guests, payment</text>
+
+  <path class="store" d="M1250 630 H1470 C1498 630 1498 725 1470 725 H1250 C1278 725 1278 630 1250 630 Z"/>
+  <text class="label" x="1312" y="670">D4 Reviews</text>
+  <text class="small" x="1316" y="692">rating/comment</text>
+
+  <path class="store" d="M1250 790 H1470 C1498 790 1498 885 1470 885 H1250 C1278 885 1278 790 1250 790 Z"/>
+  <text class="label" x="1286" y="830">D5 Admin Invites</text>
+  <text class="small" x="1300" y="852">codes and audit data</text>
+
+  <rect class="external" x="1555" y="150" width="170" height="64" rx="8"/>
+  <text class="label" x="1608" y="178">OAuth</text>
+  <text class="small" x="1594" y="198">Google, social</text>
+  <rect class="external" x="1555" y="275" width="170" height="64" rx="8"/>
+  <text class="label" x="1598" y="303">Cloudinary</text>
+  <text class="small" x="1585" y="323">media/certificates</text>
+  <rect class="external" x="1555" y="400" width="170" height="64" rx="8"/>
+  <text class="label" x="1608" y="428">Mapbox</text>
+  <text class="small" x="1587" y="448">geocode/routes</text>
+  <rect class="external" x="1555" y="525" width="170" height="64" rx="8"/>
+  <text class="label" x="1598" y="553">Cashfree</text>
+  <text class="small" x="1590" y="573">payment session</text>
+  <rect class="external" x="1555" y="650" width="170" height="64" rx="8"/>
+  <text class="label" x="1605" y="678">Mailer</text>
+  <text class="small" x="1585" y="698">reset/admin/receipt</text>
+  <rect class="external" x="1555" y="775" width="170" height="64" rx="8"/>
+  <text class="label" x="1602" y="803">Python AI</text>
+  <text class="small" x="1584" y="823">listing category</text>
+
+  <line class="flow" x1="230" y1="205" x2="330" y2="222"/>
+  <text class="flowText" x="246" y="195">auth forms</text>
+  <line class="flowLight" x1="465" y1="222" x2="500" y2="222"/>
+  <line class="flow" x1="635" y1="222" x2="1250" y2="198"/>
+  <text class="flowText" x="812" y="190">create/read user</text>
+  <line class="flow" x1="635" y1="222" x2="1555" y2="182"/>
+  <text class="flowText" x="930" y="158">social authentication</text>
+  <line class="flowLight" x1="398" y1="254" x2="398" y2="285"/>
+  <line class="flow" x1="465" y1="317" x2="1250" y2="198"/>
+  <text class="flowText" x="805" y="265">passkey data</text>
+  <line class="flow" x1="635" y1="317" x2="1250" y2="198"/>
+  <text class="flowText" x="812" y="296">profile updates</text>
+
+  <line class="flow" x1="230" y1="510" x2="330" y2="517"/>
+  <text class="flowText" x="245" y="495">listing form</text>
+  <line class="flowLight" x1="465" y1="517" x2="500" y2="517"/>
+  <line class="flow" x1="635" y1="517" x2="1555" y2="307"/>
+  <text class="flowText" x="950" y="382">images and legal docs</text>
+  <line class="flow" x1="465" y1="517" x2="1250" y2="357"/>
+  <text class="flowText" x="795" y="430">listing fields</text>
+  <line class="flow" x1="465" y1="617" x2="1555" y2="432"/>
+  <text class="flowText" x="874" y="515">coordinates</text>
+  <line class="flow" x1="635" y1="617" x2="1250" y2="357"/>
+  <text class="flowText" x="827" y="605">search/filter results</text>
+  <line class="flow" x1="465" y1="540" x2="1555" y2="807"/>
+  <text class="flowText" x="870" y="688">category request</text>
+
+  <line class="flow" x1="230" y1="220" x2="330" y2="832"/>
+  <text class="flowText" x="244" y="750">guest and dates</text>
+  <line class="flowLight" x1="465" y1="832" x2="500" y2="832"/>
+  <line class="flow" x1="635" y1="832" x2="1555" y2="557"/>
+  <text class="flowText" x="900" y="742">payment session</text>
+  <line class="flow" x1="465" y1="832" x2="1250" y2="518"/>
+  <text class="flowText" x="805" y="786">pending booking</text>
+  <line class="flow" x1="465" y1="932" x2="1555" y2="682"/>
+  <text class="flowText" x="865" y="918">receipt email</text>
+  <line class="flow" x1="635" y1="932" x2="1250" y2="518"/>
+  <text class="flowText" x="804" y="955">stay status updates</text>
+
+  <line class="flow" x1="230" y1="225" x2="790" y2="343"/>
+  <text class="flowText" x="500" y="300">review text</text>
+  <line class="flow" x1="935" y1="343" x2="1250" y2="678"/>
+  <text class="flowText" x="1015" y="500">save review</text>
+  <line class="flow" x1="230" y1="825" x2="790" y2="458"/>
+  <text class="flowText" x="500" y="610">verification decision</text>
+  <line class="flow" x1="1115" y1="458" x2="1555" y2="307"/>
+  <text class="flowText" x="1250" y="406">upload certificate</text>
+  <line class="flow" x1="1115" y1="458" x2="1250" y2="357"/>
+  <text class="flowText" x="1124" y="392">verification status</text>
+
+  <line class="flow" x1="230" y1="825" x2="790" y2="743"/>
+  <text class="flowText" x="505" y="765">dashboard request</text>
+  <line class="flow" x1="935" y1="743" x2="1250" y2="518"/>
+  <line class="flow" x1="935" y1="743" x2="1250" y2="357"/>
+  <line class="flow" x1="1115" y1="743" x2="1250" y2="198"/>
+  <text class="flowText" x="1140" y="602">summary reads</text>
+  <line class="flow" x1="1115" y1="743" x2="1250" y2="838"/>
+  <text class="flowText" x="1130" y="815">admin code</text>
+  <line class="flow" x1="935" y1="863" x2="1250" y2="518"/>
+  <text class="flowText" x="1006" y="844">booking status</text>
+  <line class="flow" x1="1115" y1="863" x2="1250" y2="518"/>
+  <text class="flowText" x="1135" y="914">report data</text>
+</svg>

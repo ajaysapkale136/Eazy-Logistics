@@ -1,0 +1,366 @@
+<% layout("layouts/boilerplate") %>
+
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap");
+
+  .listing-form-page {
+    max-width: 1020px;
+    margin: 1.2rem auto 2.4rem;
+    padding: 0 1rem;
+    font-family: "Manrope", sans-serif;
+    position: relative;
+  }
+
+  .listing-form-page::before {
+    content: "";
+    position: absolute;
+    inset: -20px -10px auto -10px;
+    height: 260px;
+    background:
+      radial-gradient(circle at 8% 24%, rgba(59, 130, 246, 0.2), transparent 38%),
+      radial-gradient(circle at 82% 0%, rgba(37, 99, 235, 0.24), transparent 36%),
+      radial-gradient(circle at 55% 56%, rgba(16, 185, 129, 0.12), transparent 40%);
+    filter: blur(6px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .listing-form-hero {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(130deg, #1e1b4b 0%, #d81d39 58%, #0e7490 100%);
+    color: #eff6ff;
+    border-radius: 22px;
+    padding: 1.65rem 1.45rem;
+    box-shadow: 0 24px 44px rgba(30, 58, 138, 0.35);
+    margin-bottom: 1.15rem;
+    overflow: hidden;
+  }
+
+  .listing-form-hero::after {
+    content: "";
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    top: -120px;
+    right: -90px;
+  }
+
+  .listing-form-hero h3 {
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    font-size: 1.9rem;
+  }
+
+  .listing-form-hero p {
+    margin: 0.55rem 0 0;
+    color: #dbeafe;
+    font-size: 1rem;
+    max-width: 700px;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.76rem;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 0.28rem 0.65rem;
+    border-radius: 999px;
+    margin-bottom: 0.8rem;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    font-weight: 700;
+  }
+
+  .listing-form-card {
+    position: relative;
+    z-index: 1;
+    background: #ffffff;
+    border: 1px solid #dbe5f0;
+    border-radius: 20px;
+    padding: 1.35rem;
+    box-shadow:
+      0 16px 32px rgba(15, 23, 42, 0.09),
+      0 1px 0 rgba(255, 255, 255, 0.75) inset;
+  }
+
+  .listing-form-section {
+    border: 1px solid #dfe8f2;
+    border-radius: 16px;
+    padding: 1.05rem;
+    background: linear-gradient(180deg, #f8fbff 0%, #f3f7fc 100%);
+    margin-bottom: 1.05rem;
+  }
+
+  .listing-form-section h6 {
+    margin: 0 0 0.95rem;
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 0.88rem;
+    letter-spacing: 0.65px;
+    text-transform: uppercase;
+  }
+
+  .listing-form-card .form-label {
+    font-size: 0.87rem;
+    color: #334155;
+    font-weight: 700;
+    margin-bottom: 0.42rem;
+  }
+
+  .listing-form-card .form-control,
+  .listing-form-card .form-select {
+    border-radius: 11px;
+    border: 1px solid #c6d3e2;
+    min-height: 47px;
+    background: #ffffff;
+    font-weight: 600;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .listing-form-card textarea.form-control {
+    min-height: 130px;
+    font-weight: 500;
+  }
+
+  .listing-form-card .form-control:focus,
+  .listing-form-card .form-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14);
+    transform: translateY(-1px);
+  }
+
+  .file-box {
+    border: 1.5px dashed #8ca4bf;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    padding: 0.95rem;
+  }
+
+  .image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 0.8rem;
+  }
+
+  .image-card {
+    border: 1px solid #dce6f2;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 0.55rem;
+    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+  }
+
+  .image-card img {
+    width: 100%;
+    height: 130px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  .image-card label {
+    margin-top: 0.4rem;
+    display: block;
+    font-size: 0.88rem;
+    color: #334155;
+  }
+
+  .doc-link {
+    border-radius: 10px;
+    border: 1px solid #dce6f2;
+    margin-bottom: 0.45rem;
+    font-size: 0.92rem;
+    background: #ffffff;
+  }
+
+  .listing-submit-btn {
+    border-radius: 11px;
+    padding: 0.7rem 1.35rem;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.22);
+  }
+
+  .listing-submit-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 768px) {
+    .listing-form-hero,
+    .listing-form-card {
+      border-radius: 14px;
+      padding: 1rem;
+    }
+  }
+</style>
+
+<section class="listing-form-page">
+  <div class="listing-form-hero">
+    <span class="hero-badge">Premium Host Console</span>
+    <h3>Edit Listing</h3>
+    <p>Take a moment to refine your listing — the same simple flow, now with the care and polish your property truly deserves.</p>
+  </div>
+
+  <div class="listing-form-card">
+    <form
+      method="POST"
+      action="/listings/<%= listing._id %>?_method=PUT"
+      enctype="multipart/form-data"
+      class="needs-validation"
+      novalidate
+    >
+      <div class="listing-form-section">
+        <h6>Basic Information</h6>
+        <div class="mb-3">
+          <label class="form-label">Title</label>
+          <input
+            type="text"
+            name="listing[title]"
+            class="form-control"
+            value="<%= listing.title %>"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea
+            name="listing[description]"
+            class="form-control"
+            required
+          ><%= listing.description %></textarea>
+        </div>
+
+        <div class="mb-0">
+          <label class="form-label">Category</label>
+          <select name="listing[category]" class="form-select">
+            <option value="">Auto-detect (Recommended)</option>
+            <option value="Trending" <%= listing.category==="Trending" ? "selected":"" %>>Trending</option>
+            <option value="Rooms" <%= listing.category==="Rooms" ? "selected":"" %>>Rooms</option>
+            <option value="Iconic Citys" <%= listing.category==="Iconic Citys" ? "selected":"" %>>Iconic Citys</option>
+            <option value="Mountain" <%= listing.category==="Mountain" ? "selected":"" %>>Mountain</option>
+            <option value="Castles" <%= listing.category==="Castles" ? "selected":"" %>>Castles</option>
+            <option value="Amazing Pools" <%= listing.category==="Amazing Pools" ? "selected":"" %>>Amazing Pools</option>
+            <option value="Camping" <%= listing.category==="Camping" ? "selected":"" %>>Camping</option>
+            <option value="Farms" <%= listing.category==="Farms" ? "selected":"" %>>Farms</option>
+            <option value="Arctic" <%= listing.category==="Arctic" ? "selected":"" %>>Arctic</option>
+            <option value="Domes" <%= listing.category==="Domes" ? "selected":"" %>>Domes</option>
+            <option value="Boats" <%= listing.category==="Boats" ? "selected":"" %>>Boats</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="listing-form-section">
+        <h6>Current Images</h6>
+        <div class="image-grid">
+          <% listing.images.forEach(img => { %>
+            <div class="image-card">
+              <img src="<%= img.url %>" alt="Listing image" />
+              <label>
+                <input type="checkbox" name="deleteImages" value="<%= img.filename %>" />
+                Remove
+              </label>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <div class="listing-form-section">
+        <h6>Photos and Legal Documents</h6>
+        <div class="mb-3">
+          <label class="form-label">Upload More Images</label>
+          <div class="file-box">
+            <input type="file" name="listing[images]" class="form-control" multiple />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Current Legal Documents</label>
+          <% if (listing.legalDocuments && listing.legalDocuments.length > 0) { %>
+            <% listing.legalDocuments.forEach((doc, index) => { %>
+              <a
+                class="list-group-item list-group-item-action doc-link"
+                href="<%= doc.url %>"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Document <%= index + 1 %>: <%= doc.label || "Property legal document" %>
+              </a>
+            <% }) %>
+            <div class="form-text mt-2">Uploading new legal documents will replace the current verification files and send them back for admin review.</div>
+          <% } else { %>
+            <div class="form-text">No legal documents uploaded yet.</div>
+          <% } %>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Replace Legal Documents</label>
+          <div class="file-box">
+            <input
+              type="file"
+              name="listing[legalDocuments]"
+              class="form-control"
+              multiple
+              accept=".pdf,image/*"
+            />
+          </div>
+        </div>
+
+        <div class="mb-0">
+          <label class="form-label">Legal Document Label</label>
+          <input
+            type="text"
+            name="listing[legalDocumentLabel]"
+            class="form-control"
+            placeholder="Example: Registry copy / Sale deed"
+            value="<%= listing.legalDocuments?.[0]?.label || '' %>"
+          />
+        </div>
+      </div>
+
+      <div class="listing-form-section">
+        <h6>Pricing and Location</h6>
+        <div class="row">
+          <div class="mb-3 col-md-4">
+            <label class="form-label">Price</label>
+            <input
+              type="number"
+              name="listing[price]"
+              value="<%= listing.price %>"
+              class="form-control"
+              required
+            />
+          </div>
+
+          <div class="mb-3 col-md-8">
+            <label class="form-label">Country</label>
+            <input
+              type="text"
+              name="listing[country]"
+              value="<%= listing.country %>"
+              class="form-control"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="mb-0">
+          <label class="form-label">Location</label>
+          <input
+            type="text"
+            name="listing[location]"
+            value="<%= listing.location %>"
+            class="form-control"
+            required
+          />
+        </div>
+      </div>
+
+      <button class="btn btn-dark listing-submit-btn mt-2">Save Changes</button>
+    </form>
+  </div>
+</section>

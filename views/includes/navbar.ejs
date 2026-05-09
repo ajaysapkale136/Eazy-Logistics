@@ -1,0 +1,183 @@
+<style>
+  /* ======================== NAVBAR UI CLEANUP ======================== */
+
+  .search-inp, .filter-input, .filter-select {
+    border-radius: 25px;
+    padding: 0.45rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .filter-input, .filter-select {
+    margin-left: 0.45rem;
+  }
+
+  .search-btn {
+    background-color: #fe424d;
+    color: #fff;
+    border-radius: 25px;
+    padding: 0.25rem 1.2rem;
+    margin-left: 0.45rem;
+    font-size: 0.9rem;
+  }
+  .search-btn:hover {
+    background-color: #fe424d;
+    opacity: 0.9;
+  }
+  .search-btn i {
+    margin-right: 0.45rem;
+  }
+
+  .nav-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ddd;
+    transition: 0.2s ease;
+  }
+  .nav-avatar:hover {
+    transform: scale(1.08);
+  }
+
+  .navbar {
+    background: #ffffff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+
+  .navbar a:focus,
+  .navbar button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  .brand-mark {
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fe424d;
+    font-size: 2rem;
+  }
+</style>
+
+<nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
+  <div class="container-fluid">
+
+    <!-- Logo -->
+    <a class="navbar-brand" href="/listings">
+      <span class="brand-mark" aria-label="Eazy-Logistics">
+        <i class="fa-regular fa-compass"></i>
+      </span>
+    </a>
+
+    <!-- Mobile Toggle -->
+    <button class="navbar-toggler" type="button" 
+            data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+
+      <!-- Left -->
+      <div class="navbar-nav">
+        <a class="nav-link" href="/listings">Explore</a>
+      </div>
+
+      <!-- CENTER SEARCH -->
+      <div class="navbar-nav mx-auto">
+        <form id="searchForm"
+              class="d-flex align-items-center"
+              method="GET"
+              action="/listings/search">
+
+          <input 
+            name="q"
+            class="form-control search-inp"
+            type="search"
+            placeholder="Search destinations"
+            value="<%= typeof q !== 'undefined' ? q : '' %>"
+          />
+
+          <input 
+            name="location"
+            class="form-control filter-input"
+            type="search"
+            placeholder="Location"
+            value="<%= typeof location !== 'undefined' ? location : '' %>"
+          />
+
+          <input 
+            name="min"
+            class="form-control filter-input"
+            type="number"
+            placeholder="Min ₹"
+            value="<%= typeof min !== 'undefined' ? min : '' %>"
+          />
+
+          <input 
+            name="max"
+            class="form-control filter-input"
+            type="number"
+            placeholder="Max ₹"
+            value="<%= typeof max !== 'undefined' ? max : '' %>"
+          />
+
+          <select name="category" class="form-select filter-select">
+            <option value="">Category</option>
+
+            <% let cat = typeof category !== 'undefined' ? category : ""; %>
+
+            <option value="Trending" <%= cat === "Trending" ? "selected" : "" %>>Trending</option>
+            <option value="Rooms" <%= cat === "Rooms" ? "selected" : "" %>>Rooms</option>
+            <option value="Iconic Citys" <%= cat === "Iconic Citys" ? "selected" : "" %>>Iconic Citys</option>
+            <option value="Mountain" <%= cat === "Mountain" ? "selected" : "" %>>Mountain</option>
+            <option value="Castles" <%= cat === "Castles" ? "selected" : "" %>>Castles</option>
+            <option value="Amazing Pools" <%= cat === "Amazing Pools" ? "selected" : "" %>>Amazing Pools</option>
+            <option value="Camping" <%= cat === "Camping" ? "selected" : "" %>>Camping</option>
+            <option value="Farms" <%= cat === "Farms" ? "selected" : "" %>>Farms</option>
+            <option value="Arctic" <%= cat === "Arctic" ? "selected" : "" %>>Arctic</option>
+            <option value="Domes" <%= cat === "Domes" ? "selected" : "" %>>Domes</option>
+            <option value="Boats" <%= cat === "Boats" ? "selected" : "" %>>Boats</option>
+          </select>
+
+          <button class="btn search-btn" type="submit">
+            <i class="fa-solid fa-magnifying-glass"></i> Search
+          </button>
+        </form>
+      </div>
+
+      <!-- RIGHT SIDE -->
+      <div class="navbar-nav ms-auto">
+
+        <a class="nav-link" href="/listings/new">
+          Eazy-Logistics your home
+        </a>
+
+        <% if (typeof currUser === "undefined" || !currUser) { %>
+          <!-- NOT LOGGED IN -->
+          <a class="nav-link" href="/signup"><b>Sign up</b></a>
+          <a class="nav-link" href="/login"><b>Log in</b></a>
+
+        <% } else { %>
+
+          <!-- LOGGED IN: PROFILE -->
+          <a class="nav-link d-flex align-items-center" href="/profile">
+            <img
+              src="<%= currUser?.profileImage?.url || '/images/default-avatar.png' %>"
+              class="nav-avatar"
+              alt="Profile"
+            >
+          </a>
+
+          <a class="nav-link"
+             href="/logout"
+             onclick="localStorage.setItem('theme','light')">
+            <b>Logout</b>
+          </a>
+
+        <% } %>
+      </div>
+    </div>
+  </div>
+</nav>

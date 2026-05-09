@@ -1,0 +1,40 @@
+<% layout("admin/layouts/admin-boilerplate") %>
+
+<div class="panel glass">
+  <div class="panel-head">
+    <h4>Reports</h4>
+    <div>
+      <input id="reportStart" type="date" />
+      <input id="reportEnd" type="date" />
+      <button id="btnDownloadCSV" class="btn ghost">Download CSV</button>
+      <button id="btnDownloadPDF" class="btn">Download PDF</button>
+    </div>
+  </div>
+
+  <div class="panel-body">
+    <p>Generate booking reports by date range. CSV is immediate. PDF is lightweight summary.</p>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", ()=>{
+  const start = document.getElementById("reportStart");
+  const end = document.getElementById("reportEnd");
+  const btnCSV = document.getElementById("btnDownloadCSV");
+  const btnPDF = document.getElementById("btnDownloadPDF");
+
+  btnCSV.addEventListener("click", ()=>{
+    const s = start.value ? `start=${start.value}` : "";
+    const e = end.value ? `end=${end.value}` : "";
+    const q = [s,e].filter(Boolean).join("&");
+    window.location.href = `/admin/api/reports/csv?${q}`;
+  });
+
+  btnPDF.addEventListener("click", ()=>{
+    const s = start.value ? `start=${start.value}` : "";
+    const e = end.value ? `end=${end.value}` : "";
+    const q = [s,e].filter(Boolean).join("&");
+    window.location.href = `/admin/api/reports/pdf?${q}`;
+  });
+});
+</script>

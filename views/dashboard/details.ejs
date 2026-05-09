@@ -1,0 +1,118 @@
+<% layout("layouts/boilerplate") %>
+<link rel="stylesheet" href="/css/user-dashboard.css">
+
+<style>
+  /* Upload Box Styling */
+  .upload-box {
+    border: 2px dashed #e5e7eb;
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+    background: #f9fafb;
+    position: relative;
+    overflow: hidden;
+  }
+  .upload-box:hover { border-color: #f43f5e; background: #fff1f2; }
+  
+  .upload-label { display: block; font-size: 14px; font-weight: 600; color: #555; margin-bottom: 10px; }
+  .preview-img { width: 100%; height: 150px; object-fit: contain; margin-bottom: 10px; display: none; }
+  .current-img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; margin-top: 10px; }
+  
+  .form-section { margin-bottom: 30px; }
+  .btn-save { background: #f43f5e; color: white; padding: 12px 24px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; width: 100%; margin-top: 20px; }
+  .btn-save:hover { background: #e11d48; }
+</style>
+
+<div class="dashboard-container">
+
+  <aside class="sidebar">
+    <div class="glass-card profile-section">
+      <img src="<%= currUser.profileImage?.url || '/images/default-avatar.png' %>" class="profile-img">
+      <h5 style="margin:0; font-weight:700;"><%= currUser.username %></h5>
+      <p style="margin:5px 0 0; font-size:12px; color:var(--text-muted);">User Dashboard</p>
+    </div>
+    <nav class="glass-card nav-menu">
+      <a href="/dashboard" class="nav-link"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+      <a href="/profile/edit" class="nav-link"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
+      <a href="/bookings" class="nav-link"><i class="fa-solid fa-suitcase"></i> Booking Manager</a>
+      <div class="nav-link active no-link"><i class="fa-solid fa-wallet"></i> Payment Details</div>
+      <a href="/listings" class="nav-link"><i class="fa-solid fa-house"></i> My Listings</a>
+      <a href="/logout" class="nav-link danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="main-content" style="grid-column: span 2;">
+    <div class="glass-card" style="max-width: 800px; margin: 0 auto;">
+        
+        <div style="border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 25px;">
+            <h3 style="margin:0; font-weight:800; color:var(--text-main);">Payment & Verification</h3>
+            <p style="margin:5px 0 0; font-size:13px; color:var(--text-muted);">Upload your QR for payments and Signature for automated receipts.</p>
+        </div>
+
+        <form action="/dashboard/details" method="POST" enctype="multipart/form-data">
+            
+            <div class="form-section">
+                <label class="upload-label"><i class="fa-solid fa-qrcode"></i> UPI Payment QR Code</label>
+                <div class="upload-box" onclick="document.getElementById('qrInput').click()">
+                    <% if(currUser.paymentQR && currUser.paymentQR.url) { %>
+                        <img src="<%= currUser.paymentQR.url %>" class="current-img" id="qrPreviewCurrent">
+                        <p style="font-size:12px; color:green; margin-top:5px;">Current QR Active</p>
+                    <% } else { %>
+                        <div id="qrPlaceholder">
+                            <i class="fa-solid fa-cloud-arrow-up" style="font-size:30px; color:#ccc;"></i>
+                            <p style="font-size:12px; color:#999; margin-top:5px;">Click to upload QR Image</p>
+                        </div>
+                    <% } %>
+                    <img id="qrPreviewNew" class="preview-img">
+                </div>
+                <input type="file" name="paymentQR" id="qrInput" accept="image/*" style="display:none;" onchange="previewImage(this, 'qrPreviewNew', 'qrPreviewCurrent', 'qrPlaceholder')">
+            </div>
+
+            <div class="form-section">
+                <label class="upload-label">UPI ID (Optional)</label>
+                <input type="text" name="upiId" value="<%= currUser.upiId || '' %>" class="form-control" placeholder="e.g. username@oksbi" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+            </div>
+
+            <hr style="border:0; border-top:1px dashed #ddd; margin: 30px 0;">
+
+            <div class="form-section">
+                <label class="upload-label"><i class="fa-solid fa-file-signature"></i> Digital Signature (For Receipts)</label>
+                <div class="upload-box" onclick="document.getElementById('sigInput').click()">
+                    <% if(currUser.signature && currUser.signature.url) { %>
+                        <img src="<%= currUser.signature.url %>" class="current-img" id="sigPreviewCurrent">
+                        <p style="font-size:12px; color:green; margin-top:5px;">Signature Uploaded</p>
+                    <% } else { %>
+                        <div id="sigPlaceholder">
+                            <i class="fa-solid fa-pen-nib" style="font-size:30px; color:#ccc;"></i>
+                            <p style="font-size:12px; color:#999; margin-top:5px;">Click to upload Signature</p>
+                        </div>
+                    <% } %>
+                    <img id="sigPreviewNew" class="preview-img">
+                </div>
+                <input type="file" name="signature" id="sigInput" accept="image/*" style="display:none;" onchange="previewImage(this, 'sigPreviewNew', 'sigPreviewCurrent', 'sigPlaceholder')">
+            </div>
+
+            <button class="btn-save">Save Details</button>
+        </form>
+
+    </div>
+  </main>
+</div>
+
+<script>
+    function previewImage(input, previewId, currentId, placeholderId) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById(previewId).src = e.target.result;
+                document.getElementById(previewId).style.display = 'block';
+                // Hide old elements
+                if(document.getElementById(currentId)) document.getElementById(currentId).style.display = 'none';
+                if(document.getElementById(placeholderId)) document.getElementById(placeholderId).style.display = 'none';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>

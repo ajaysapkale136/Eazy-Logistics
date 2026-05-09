@@ -1,0 +1,205 @@
+<% layout("layouts/boilerplate") %>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm Reservation</title>
+  
+  <link rel="stylesheet" href="/css/booking.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+
+<body>
+
+<div class="booking-page">
+  <div class="booking-card">
+
+    <div class="booking-left">
+      <div class="listing-image-container">
+        <img src="<%= typeof listingImage !== 'undefined' ? listingImage : '/images/default.jpg' %>" 
+             class="listing-image" alt="Property Image">
+      </div>
+
+      <h3><%= typeof listingTitle !== 'undefined' ? listingTitle : 'Listing' %></h3>
+
+      <div class="date-box" onclick="fpCheckIn.open()">
+        <p>Check-in</p>
+        <p id="summaryCheckIn"><%= typeof checkIn !== 'undefined' ? checkIn : 'Select Date' %></p>
+      </div>
+
+      <div class="date-box" onclick="fpCheckOut.open()">
+        <p>Check-out</p>
+        <p id="summaryCheckOut"><%= typeof checkOut !== 'undefined' ? checkOut : 'Select Date' %></p>
+      </div>
+
+      <p class="guests">Guests: <strong><%= typeof guests !== 'undefined' ? guests : 1 %></strong></p>
+
+      <div class="price-section">
+        <p class="price">
+            ₹ <span id="summaryTotalPrice">0</span>
+            <span>/ total</span>
+        </p>
+        <small class="text-muted" style="color:#666; font-size:13px; display:block; margin-top:4px;">
+            <% const safePrice = typeof pricePerNight !== 'undefined' ? pricePerNight : 0; %>
+            (₹<%= parseInt(safePrice).toLocaleString("en-IN") %> x <span id="summaryNights">1</span> nights)
+        </small>
+      </div>
+    </div>
+
+    <form method="POST" action="/bookings/confirm" class="booking-right">
+
+      <div class="hotel-logo-container">
+        <img src="/images/logo.png" alt="Logo" class="hotel-logo">
+      </div>
+
+      <input type="hidden" name="listingId" value="<%= typeof listingId !== 'undefined' ? listingId : '' %>">
+      <input type="hidden" name="guests" value="<%= typeof guests !== 'undefined' ? guests : 1 %>">
+      <input type="hidden" name="amount" id="formAmountInput">
+      <input type="hidden" name="mapLng" value="<%= mapRoute?.lng || '' %>">
+      <input type="hidden" name="mapLat" value="<%= mapRoute?.lat || '' %>">
+      <input type="hidden" name="mapSource" value="<%= mapRoute?.source || '' %>">
+      <input type="hidden" name="mapTravelMode" value="<%= mapRoute?.travelMode || '' %>">
+      <input type="hidden" name="mapDistanceKm" value="<%= mapRoute?.distanceKm || '' %>">
+      <input type="hidden" name="mapDurationMin" value="<%= mapRoute?.durationMin || '' %>">
+
+      <h2>Reservation Details</h2>
+      <p class="sub-text">Select your dates to see the total price.</p>
+
+      <div class="form-row">
+        <div>
+            <label>Check-in Date *</label>
+            <input type="text" name="checkIn" id="checkInInput" 
+                   value="<%= typeof checkIn !== 'undefined' ? checkIn : '' %>" required 
+                   placeholder="Select Date">
+        </div>
+        <div>
+            <label>Check-out Date *</label>
+            <input type="text" name="checkOut" id="checkOutInput" 
+                   value="<%= typeof checkOut !== 'undefined' ? checkOut : '' %>" required 
+                   placeholder="Select Date">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label>First Name *</label>
+          <input type="text" name="firstName" placeholder="e.g. Rahul" required>
+        </div>
+        <div>
+          <label>Last Name *</label>
+          <input type="text" name="lastName" placeholder="e.g. Sharma" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label>Email *</label>
+          <input type="email" name="email" placeholder="rahul@example.com" required>
+        </div>
+        <div>
+          <label>Phone *</label>
+          <input type="tel" name="phone" placeholder="+91 98765 43210" required>
+        </div>
+      </div>
+
+      <label>Address *</label>
+      <input type="text" name="address" placeholder="Flat No, Street, Area" required>
+
+      <div class="form-row">
+        <div>
+          <label>City *</label>
+          <input type="text" name="city" required>
+        </div>
+        <div>
+          <label>State *</label>
+          <input type="text" name="state" required>
+        </div>
+        <div>
+          <label>Zip Code *</label>
+          <input type="text" name="zip" required>
+        </div>
+      </div>
+
+      <label>Room Preference *</label>
+      <div class="radio-group">
+        <label><input type="radio" name="roomType" value="Standard" checked> Standard</label>
+        <label><input type="radio" name="roomType" value="Deluxe"> Deluxe</label>
+        <label><input type="radio" name="roomType" value="Suite"> Suite</label>
+      </div>
+
+      <button class="continue-btn" type="submit">
+         Continue to Payment → 
+      </button>
+
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    const summaryCheckIn = document.getElementById('summaryCheckIn');
+    const summaryCheckOut = document.getElementById('summaryCheckOut');
+    const summaryTotalPrice = document.getElementById('summaryTotalPrice');
+    const summaryNights = document.getElementById('summaryNights');
+    const formAmountInput = document.getElementById('formAmountInput');
+    
+    const rawPrice = "<%= typeof pricePerNight !== 'undefined' ? pricePerNight : 0 %>";
+    const pricePerNight = Number(rawPrice.toString().replace(/[^0-9.]/g, '')) || 0;
+
+    const fpCheckIn = flatpickr("#checkInInput", {
+        enableTime: false,
+        dateFormat: "Y-m-d",
+        altInput: true,       
+        altFormat: "F j, Y",  
+        animate: true,        
+        minDate: "today",
+        onChange: function(selectedDates, dateStr, instance) {
+            updateCalculations();
+            if(selectedDates.length > 0) {
+                fpCheckOut.set('minDate', dateStr); 
+                setTimeout(() => fpCheckOut.open(), 200); 
+            }
+        }
+    });
+
+    const fpCheckOut = flatpickr("#checkOutInput", {
+        enableTime: false,
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "F j, Y",
+        animate: true,
+        minDate: "today",
+        onChange: function(selectedDates, dateStr, instance) {
+            updateCalculations();
+        }
+    });
+
+    function updateCalculations() {
+        const date1 = fpCheckIn.selectedDates[0];
+        const date2 = fpCheckOut.selectedDates[0];
+
+        if (date1) summaryCheckIn.innerText = date1.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        if (date2) summaryCheckOut.innerText = date2.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+        let nights = 1;
+
+        if (date1 && date2) {
+            let timeDiff = date2.getTime() - date1.getTime();
+            nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        }
+
+        if (nights < 1) nights = 1;
+
+        const total = nights * pricePerNight;
+        summaryNights.innerText = nights;
+        summaryTotalPrice.innerText = total.toLocaleString("en-IN");
+        
+        if (formAmountInput) formAmountInput.value = total;
+    }
+
+    updateCalculations();
+</script>
+
+</body>
+</html>  

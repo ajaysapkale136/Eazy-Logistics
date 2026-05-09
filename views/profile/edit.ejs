@@ -1,0 +1,168 @@
+<% layout("layouts/boilerplate") %>
+
+<div class="container mt-5 profile-page <%= theme %>">
+
+  <div class="row justify-content-center">
+
+    <!-- ======================= SIDEBAR ======================= -->
+    <div class="col-lg-4 mb-4">
+      <div class="card profile-side-card p-4 glass-card hover-float">
+
+        <div class="text-center">
+          <!-- PROFILE IMAGE -->
+          <div class="profile-image-wrap mb-3">
+            <img 
+              src="<%= currUser?.profileImage?.url 
+                || currUser?.profileImage?.[0]?.url
+                || '/images/default-avatar.png' %>"
+              class="rounded-circle profile-image-large floating-img"
+              alt="profile"
+            >
+          </div>
+
+          <h5 class="mb-1"><%= currUser?.username %></h5>
+          <small class="text-muted mb-3 d-block"><%= currUser?.email %></small>
+
+          <!-- SIDEBAR BUTTONS WITH ACTIVE STATE -->
+          <a href="/profile/me" class="profile-btn <%= active==='overview' ? 'active' : '' %>">Profile Overview</a>
+
+          <a href="/profile/edit" class="profile-btn <%= active==='edit' ? 'active' : '' %>">Edit Profile</a>
+
+          <a href="/profile/listings" class="profile-btn <%= active==='listings' ? 'active' : '' %>">My Listings</a>
+
+          <a href="/profile/password" class="profile-btn <%= active==='password' ? 'active' : '' %>">Change Password</a>
+
+          <a href="/profile/settings" class="profile-btn <%= active==='settings' ? 'active' : '' %>">Settings</a>
+
+          <!-- LOGOUT -->
+          <form action="/logout" method="POST" class="mt-3">
+            <button type="submit" class="profile-btn logout-red w-100">Log Out</button>
+          </form>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================= RIGHT PANEL (EDIT PROFILE EXAMPLE) ======================= -->
+    <div class="col-lg-8">
+      <div class="card edit-form-card p-4 glass-card hover-float">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Edit Profile</h4>
+          <small class="text-muted">
+            Last updated: <%= user.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : "—" %>
+          </small>
+        </div>
+
+        <form action="/profile?_method=PUT" method="POST" enctype="multipart/form-data" class="row g-3">
+
+          <!-- PROFILE IMAGE UPLOAD -->
+          <div class="col-12 d-flex align-items-center gap-3">
+            <div class="upload-preview-wrap d-flex align-items-center gap-3">
+              <div class="upload-preview">
+                <img 
+                  id="smallPreview" 
+                  src="<%= user.profileImage?.url || '/images/default-avatar.png' %>"
+                  class="rounded-circle"
+                  style="width:72px;height:72px;object-fit:cover;"
+                >
+              </div>
+
+              <div>
+                <label for="profileImage" class="btn btn-outline-primary btn-sm mb-1">Upload</label>
+                <button type="button" id="removeImage" class="btn btn-outline-danger btn-sm mb-1">Remove</button>
+                <div class="text-muted small">JPEG/PNG • Max 3MB</div>
+              </div>
+            </div>
+
+            <input id="profileImage" name="profileImage" type="file" class="d-none" accept="image/*">
+          </div>
+
+          <!-- Username -->
+          <div class="col-md-6">
+            <label class="form-label">Username</label>
+            <input name="username" value="<%= user.username %>" class="form-control" required>
+          </div>
+
+          <!-- Email -->
+          <div class="col-md-6">
+            <label class="form-label">Email</label>
+            <input value="<%= user.email %>" class="form-control" readonly>
+          </div>
+
+          <!-- PHONE -->
+          <div class="col-md-6">
+            <label class="form-label">Phone</label>
+            <input name="phone" value="<%= user.phone || '' %>" class="form-control" placeholder="+91 90000 00000">
+          </div>
+
+          <!-- ADDRESS -->
+          <div class="col-md-6">
+            <label class="form-label">Location</label>
+            <input name="address" value="<%= user.address || '' %>" class="form-control" placeholder="City, State">
+          </div>
+
+          <!-- BIO -->
+          <div class="col-12">
+            <label class="form-label">Bio</label>
+            <textarea name="bio" class="form-control" rows="3"><%= user.bio || '' %></textarea>
+          </div>
+
+          <!-- SOCIAL LINKS -->
+          <div class="col-md-6">
+            <label class="form-label">Instagram</label>
+            <input name="instagram" value="<%= user.socialLinks?.instagram || '' %>" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">LinkedIn</label>
+            <input name="linkedin" value="<%= user.socialLinks?.linkedin || '' %>" class="form-control">
+          </div>
+
+          <!-- SAVE BUTTON -->
+          <div class="col-12 d-flex justify-content-end gap-3 mt-2">
+            <button type="submit" class="btn modern-btn">Save Changes</button>
+            <a href="/profile/me" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== IMAGE PREVIEW SCRIPT ========== -->
+<script>
+(function () {
+  const fileInput = document.getElementById("profileImage");
+  const previewMain = document.getElementById("previewImage");
+  const previewSmall = document.getElementById("smallPreview");
+  const removeBtn = document.getElementById("removeImage");
+
+  fileInput?.addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    previewMain.src = url;
+    previewSmall.src = url;
+  });
+
+  removeBtn?.addEventListener("click", () => {
+    fileInput.value = "";
+    previewMain.src = "/images/default-avatar.png";
+    previewSmall.src = "/images/default-avatar.png";
+
+    if (!document.getElementById("removeFlag")) {
+      const hidden = document.createElement("input");
+      hidden.type = "hidden";
+      hidden.name = "removeImage";
+      hidden.value = "1";
+      hidden.id = "removeFlag";
+      document.querySelector("form").appendChild(hidden);
+    }
+  });
+})();
+</script>

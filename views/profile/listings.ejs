@@ -1,0 +1,108 @@
+<% layout("layouts/boilerplate") %>
+
+<div class="container mt-4 profile-page <%= theme %>">
+
+
+  <!-- LEFT SIDEBAR -->
+  <div class="glass-card profile-sidebar">
+    <div class="text-center py-4">
+
+      <!-- FIXED PROFILE IMAGE -->
+      <img 
+        src="<%= currUser?.profileImage?.url 
+              || currUser?.profileImage?.[0]?.url
+              || currUser?.image?.url
+              || '/images/default-avatar.png' %>" 
+        class="profile-photo-lg"
+      >
+
+      <h5 class="mt-2"><%= currUser?.username %></h5>
+      <p class="small text-muted"><%= currUser?.email %></p>
+    </div>
+
+    <div class="p-3">
+      <a href="/profile/me" class="menu-item">
+        <i class="fa fa-user"></i> Profile Overview
+      </a>
+
+      <a href="/profile/edit" class="menu-item">
+        <i class="fa fa-pen"></i> Edit Profile
+      </a>
+
+      <a href="/profile/listings" class="menu-item active">
+        <i class="fa fa-home"></i> My Listings
+      </a>
+
+      <a href="/profile/password" class="menu-item">
+        <i class="fa fa-lock"></i> Change Password
+      </a>
+
+      <a href="/profile/settings" class="menu-item">
+        <i class="fa fa-cog"></i> Settings
+      </a>
+    </div>
+  </div>
+
+
+  <!-- RIGHT MAIN CONTENT → LISTINGS -->
+  <div class="glass-card profile-main">
+    <h4 class="mb-3">My Listings</h4>
+
+    <% if (listings.length === 0) { %>
+      <div class="alert alert-light">You have no listings yet.</div>
+    <% } else { %>
+
+      <div class="row">
+        <% listings.forEach(listing => { %>
+
+          <div class="col-md-6 mb-3">
+            <div class="card">
+              
+              <!-- LISTING IMAGE -->
+              <img 
+                src="<%= listing.images?.[0]?.url 
+                      || listing.image?.url 
+                      || '/images/default.jpg' %>" 
+                class="card-img-top" 
+                style="height:180px;object-fit:cover;"
+              >
+
+              <div class="card-body">
+
+                <!-- MODERN TITLE -->
+                <p class="listing-title">
+                  <a href="/listings/<%= listing._id %>" class="listing-link">
+                    <%= listing.title %>
+                  </a>
+                </p>
+
+                <!-- CATEGORY SUBTITLE -->
+                <p class="listing-subtitle"><%= listing.category %></p>
+
+                <!-- PRICE -->
+                <p class="text-muted">
+                  ₹ <%= listing.price.toLocaleString('en-IN') %> / night
+                </p>
+
+                <!-- ACTION BUTTONS -->
+                <div class="d-flex gap-2">
+                  <a class="btn btn-sm btn-dark" href="/listings/<%= listing._id %>/edit">
+                    Edit
+                  </a>
+
+                  <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" class="d-inline">
+                    <button class="btn btn-sm btn-outline-danger">Delete</button>
+                  </form>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        <% }) %>
+      </div>
+
+    <% } %>
+  </div>
+
+</div>

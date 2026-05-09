@@ -1,0 +1,309 @@
+<% layout("layouts/boilerplate") %>
+
+<style>
+  :root {
+    --verify-brand: #fe424d;
+    --verify-brand-deep: #d63640;
+    --verify-ink: #0f172a;
+    --verify-muted: #64748b;
+    --verify-surface: #ffffff;
+    --verify-line: #e2e8f0;
+    --verify-soft: #fff6f7;
+    --verify-success: #15803d;
+  }
+
+  .verify-shell {
+    padding: 2rem 0;
+    background:
+      radial-gradient(800px 300px at 0% 0%, rgba(254, 66, 77, 0.08), transparent 70%),
+      radial-gradient(700px 260px at 100% 10%, rgba(17, 24, 39, 0.06), transparent 65%);
+  }
+
+  .verify-card {
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 22px;
+    background: linear-gradient(180deg, #ffffff 0%, #fffdfd 100%);
+    box-shadow: 0 14px 38px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+  }
+
+  .verify-head {
+    border-bottom: 1px solid var(--verify-line);
+    padding-bottom: 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .verify-head h3 {
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    color: var(--verify-ink);
+  }
+
+  .verify-subtitle {
+    margin-top: 0.35rem;
+    color: var(--verify-muted);
+    font-weight: 600;
+  }
+
+  .verify-subtitle strong {
+    color: var(--verify-brand-deep);
+  }
+
+  .verify-download-btn {
+    background: linear-gradient(120deg, #12a150 0%, #0d8a44 100%);
+    color: #fff !important;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    padding: 0.45rem 0.9rem;
+    box-shadow: 0 8px 18px rgba(13, 138, 68, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .verify-download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 20px rgba(13, 138, 68, 0.3);
+  }
+
+  .verify-card .form-label {
+    font-size: 0.86rem;
+    color: #334155;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    margin-bottom: 0.45rem;
+  }
+
+  .verify-card .form-control {
+    border: 1px solid #d7dee7;
+    border-radius: 10px;
+    min-height: 44px;
+    padding: 0.58rem 0.8rem;
+    background: #f8fafc;
+    color: var(--verify-ink);
+    font-weight: 600;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
+  }
+
+  .verify-card textarea.form-control {
+    min-height: 104px;
+    font-weight: 500;
+  }
+
+  .verify-status-field {
+    background: linear-gradient(180deg, #f0fdf4 0%, #ecfdf3 100%) !important;
+    border-color: #bbf7d0 !important;
+    color: var(--verify-success) !important;
+    text-transform: capitalize;
+  }
+
+  .verify-doc-title {
+    margin-bottom: 0.6rem;
+  }
+
+  .verify-doc-pill {
+    border-radius: 999px;
+    border: 1px solid rgba(254, 66, 77, 0.35);
+    background: rgba(254, 66, 77, 0.08);
+    color: #9f1239 !important;
+    font-weight: 700;
+    padding: 0.36rem 0.78rem;
+    transition: all 0.2s ease;
+  }
+
+  .verify-doc-pill:hover {
+    border-color: rgba(254, 66, 77, 0.75);
+    background: rgba(254, 66, 77, 0.18);
+    transform: translateY(-1px);
+  }
+
+  .verify-signature-box {
+    border: 1px solid #dbe5f1;
+    border-radius: 14px;
+    background:
+      linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    padding: 1rem;
+  }
+
+  .verify-signature-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--verify-ink);
+    margin-bottom: 0.75rem;
+  }
+
+  .verify-signature-img {
+    max-width: 240px;
+    max-height: 90px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #fff;
+    padding: 0.28rem;
+    border: 1px solid #e2e8f0;
+  }
+
+  body.dark .verify-card,
+  body.midnight .verify-card,
+  body.neon .verify-card {
+    background: linear-gradient(180deg, #101828 0%, #0f172a 100%);
+    border-color: rgba(148, 163, 184, 0.25);
+    box-shadow: 0 16px 40px rgba(2, 6, 23, 0.6);
+  }
+
+  body.dark .verify-head,
+  body.midnight .verify-head,
+  body.neon .verify-head {
+    border-bottom-color: rgba(148, 163, 184, 0.25);
+  }
+
+  body.dark .verify-head h3,
+  body.midnight .verify-head h3,
+  body.neon .verify-head h3,
+  body.dark .verify-signature-title,
+  body.midnight .verify-signature-title,
+  body.neon .verify-signature-title {
+    color: #f8fafc;
+  }
+
+  body.dark .verify-subtitle,
+  body.midnight .verify-subtitle,
+  body.neon .verify-subtitle {
+    color: #cbd5e1;
+  }
+
+  body.dark .verify-card .form-label,
+  body.midnight .verify-card .form-label,
+  body.neon .verify-card .form-label {
+    color: #e2e8f0;
+  }
+
+  body.dark .verify-card .form-control,
+  body.midnight .verify-card .form-control,
+  body.neon .verify-card .form-control {
+    background: rgba(15, 23, 42, 0.7);
+    border-color: rgba(148, 163, 184, 0.4);
+    color: #f8fafc;
+  }
+
+  body.dark .verify-status-field,
+  body.midnight .verify-status-field,
+  body.neon .verify-status-field {
+    background: rgba(21, 128, 61, 0.2) !important;
+    border-color: rgba(74, 222, 128, 0.35) !important;
+    color: #86efac !important;
+  }
+
+  body.dark .verify-signature-box,
+  body.midnight .verify-signature-box,
+  body.neon .verify-signature-box {
+    border-color: rgba(148, 163, 184, 0.3);
+    background: rgba(15, 23, 42, 0.5);
+  }
+
+  body.dark .verify-signature-img,
+  body.midnight .verify-signature-img,
+  body.neon .verify-signature-img {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(148, 163, 184, 0.35);
+  }
+
+  @media (max-width: 768px) {
+    .verify-shell {
+      padding: 1rem 0 1.5rem;
+    }
+
+    .verify-head h3 {
+      font-size: 1.4rem;
+    }
+  }
+</style>
+
+<div class="container verify-shell">
+  <div class="card verify-card border-0 mx-auto" style="max-width: 900px;">
+    <div class="card-body p-4 p-md-5">
+      <div class="verify-head d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <h3 class="mb-1">Property Registration Verification Form</h3>
+          <p class="verify-subtitle mb-0">
+            Verified by Admin / <strong>EZAY LOGISTICS</strong>
+          </p>
+        </div>
+        <% if (listing.verificationCertificate && listing.verificationCertificate.url) { %>
+          <a class="btn verify-download-btn btn-sm" href="<%= listing.verificationCertificate.url %>" target="_blank" rel="noopener noreferrer">
+            Download Verified PDF
+          </a>
+        <% } %>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Listing ID</label>
+          <input class="form-control" value="<%= listing._id %>" readonly>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Property Title</label>
+          <input class="form-control" value="<%= listing.title || '' %>" readonly>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Owner Name</label>
+          <input class="form-control" value="<%= listing.owner?.username || '' %>" readonly>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Owner Email</label>
+          <input class="form-control" value="<%= listing.owner?.email || '' %>" readonly>
+        </div>
+
+        <div class="col-md-8">
+          <label class="form-label">Location</label>
+          <input class="form-control" value="<%= listing.location || '' %>, <%= listing.country || '' %>" readonly>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Current Status</label>
+          <input class="form-control verify-status-field" value="<%= listing.verificationStatus %>" readonly>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Verified On</label>
+          <input class="form-control" value="<%= verifiedOnText %>" readonly>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Certificate Generated On</label>
+          <input class="form-control" value="<%= certificateGeneratedOnText %>" readonly>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Verification Note</label>
+          <textarea class="form-control" rows="3" readonly><%= listing.verificationNote || "No note provided." %></textarea>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label verify-doc-title">Submitted Registration Documents</label>
+          <div class="d-flex flex-wrap gap-2">
+            <% if (listing.legalDocuments && listing.legalDocuments.length > 0) { %>
+              <% listing.legalDocuments.forEach((doc, index) => { %>
+                <a class="btn verify-doc-pill btn-sm" href="<%= doc.url %>" target="_blank" rel="noopener noreferrer">
+                  Document <%= index + 1 %> (<%= doc.label || "Legal document" %>)
+                </a>
+              <% }) %>
+            <% } else { %>
+              <span class="text-muted">No registration document found.</span>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="col-12 mt-3">
+          <div class="verify-signature-box">
+            <div class="verify-signature-title">Owner Signature</div>
+            <% if (listing.owner?.signature?.url) { %>
+              <img src="<%= listing.owner.signature.url %>" alt="Owner Signature" class="verify-signature-img">
+            <% } else { %>
+              <img src="/images/signature.png" alt="Default Signature" class="verify-signature-img">
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

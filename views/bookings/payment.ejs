@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Payment - <%= typeof listingTitle !== 'undefined' ? listingTitle : 'Checkout' %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/payment.css">
+</head>
+<body>
+
+<div class="payment-wrapper">
+  
+  <div class="payment-container">
+    
+    <div class="payment-selection">
+      
+      <div class="header-nav">
+        <span>Account &rarr; Payment methods</span>
+      </div>
+      
+      <h1>Choose your payment method</h1>
+
+      <div class="method-option active" id="option-card" onclick="selectMethod('card')">
+        <div class="method-icon">
+            <img src="https://img.icons8.com/color/48/visa.png" alt="Visa">
+        </div>
+        <div class="method-details">
+            <span class="method-number">Visa / MasterCard / RuPay</span>
+            <span class="method-expiry">Credit or Debit Card</span>
+        </div>
+        <div class="method-check">
+            <div class="check-circle"></div>
+        </div>
+      </div>
+
+      <div class="method-option" id="option-upi" onclick="selectMethod('upi')">
+        <div class="method-icon">
+            <img src="https://img.icons8.com/color/48/google-pay-india.png" alt="UPI">
+        </div>
+        <div class="method-details">
+            <span class="method-number">UPI / BHIM / GPay</span>
+            <span class="method-expiry">Instant Payment</span>
+        </div>
+        <div class="method-check">
+            <div class="check-circle"></div>
+        </div>
+      </div>
+
+      <div class="method-option add-new">
+        <div class="method-icon">
+            <span style="font-size: 24px;">+</span>
+        </div>
+        <div class="method-details">
+            <span class="method-number">Net Banking / Wallet</span>
+        </div>
+      </div>
+
+      <div class="total-display">
+          <span>Total to Pay:</span>
+          <h2>₹ <%= amount.toLocaleString("en-IN") %></h2>
+      </div>
+
+    </div>
+
+    <div class="payment-form-area">
+        
+        <div id="view-card" class="payment-view" style="display: block;">
+            
+            <div class="credit-card-preview">
+                <div class="card-chip-icon">
+                    <img src="https://img.icons8.com/officexs/64/sim-card-chip.png" alt="chip">
+                </div>
+                <div class="card-logo-right">VISA</div>
+                
+                <div class="card-text-name" id="preview-name">
+                    <%= booking?.firstName || "Guest" %> <%= booking?.lastName || "User" %>
+                </div>
+                <div class="card-text-expiry" id="preview-expiry">MM/YY</div>
+                <div class="card-text-number" id="preview-number">**** **** **** 4242</div>
+            </div>
+
+            <form onsubmit="return false;">
+                <div class="input-group">
+                    <label>Name on Card</label>
+                    <input type="text" 
+                           id="input-name"
+                           value="<%= booking?.firstName %> <%= booking?.lastName %>" 
+                           class="styled-input"
+                           oninput="updateCardPreview()">
+                </div>
+                <div class="row-inputs">
+                    <div class="input-group">
+                        <label>Expiration</label>
+                        <input type="text" 
+                               id="input-expiry"
+                               placeholder="MM/YY" 
+                               class="styled-input"
+                               maxlength="5"
+                               oninput="updateCardPreview()">
+                    </div>
+                    <div class="input-group">
+                        <label>CVV</label>
+                        <input type="password" 
+                               placeholder="123" 
+                               class="styled-input"
+                               maxlength="3">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Card Number</label>
+                    <input type="text" 
+                           id="input-number"
+                           placeholder="0000 0000 0000 0000" 
+                           class="styled-input"
+                           maxlength="19"
+                           oninput="updateCardPreview()">
+                </div>
+                
+                <div class="button-container">
+                    <button type="button" class="cancel-btn" onclick="history.back()">Cancel</button>
+                    <button type="button" onclick="processPayment()" class="submit-btn card-pay-btn">
+                        Submit & Pay
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="view-upi" class="payment-view" style="display: none;">
+            
+            <h2 style="margin-top:0; font-size: 20px; margin-bottom: 20px;">Scan & Pay</h2>
+            
+            <div class="qr-container">
+                <div class="qr-box">
+                    <% 
+                       // 1. Default to Generated QR (Fallback)
+                       let qrSource = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=eazylogistics@upi&am=${amount}`;
+                       
+                       // 2. Check if Host has uploaded a Personal Payment QR (Priority)
+                       if (booking.listing && booking.listing.owner && booking.listing.owner.paymentQR && booking.listing.owner.paymentQR.url) {
+                           qrSource = booking.listing.owner.paymentQR.url;
+                       }
+                    %>
+                    
+                    <img src="<%= qrSource %>" alt="Payment QR" style="max-width: 150px; border-radius: 8px;">
+                    
+                    <% if(booking.listing && booking.listing.owner && booking.listing.owner.paymentQR && booking.listing.owner.paymentQR.url) { %>
+                        <p style="color: #22c55e; font-weight: 600;">Paying Host Directly</p>
+                    <% } else { %>
+                        <p>Scan with any UPI App</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <label class="section-label">Or pay with</label>
+            <div class="upi-apps-grid">
+                <div class="upi-app">
+                    <img src="https://img.icons8.com/color/48/google-pay-india.png" alt="GPay">
+                    <span>GPay</span>
+                </div>
+                <div class="upi-app">
+                    <img src="https://img.icons8.com/color/48/phone-pe.png" alt="PhonePe">
+                    <span>PhonePe</span>
+                </div>
+                <div class="upi-app">
+                    <img src="https://img.icons8.com/color/48/paytm.png" alt="Paytm">
+                    <span>Paytm</span>
+                </div>
+                <div class="upi-app">
+                    <img src="https://img.icons8.com/color/48/bhim.png" alt="BHIM">
+                    <span>BHIM</span>
+                </div>
+            </div>
+
+            <div class="input-group" style="margin-top: 25px;">
+                <label>Enter UPI ID</label>
+                <input type="text" placeholder="example@upi" class="styled-input">
+            </div>
+
+            <div class="button-container">
+                <button type="button" class="cancel-btn" onclick="history.back()">Cancel</button>
+                <button type="button" onclick="processPayment()" class="submit-btn upi-pay-btn">
+                    Submit & Pay
+                </button>
+            </div>
+
+        </div>
+
+        <p class="secure-note">
+            <img src="https://img.icons8.com/ios-glyphs/30/4a90e2/lock--v1.png" width="12"> 
+            Redirecting to secure Cashfree gateway
+        </p>
+
+    </div>
+
+  </div>
+</div>
+
+<input type="hidden" id="bookingId" value="<%= booking._id %>">
+
+<script src="https://sdk.cashfree.com/js/ui/2.0.0/cashfree-ui.js"></script>
+
+<script>
+  /* =====================================================
+       1. UI: TAB SWITCHING & LIVE PREVIEW
+  ===================================================== */
+  function selectMethod(method) {
+      document.querySelectorAll('.method-option').forEach(el => el.classList.remove('active'));
+      const activeOption = document.getElementById('option-' + method);
+      if(activeOption) activeOption.classList.add('active');
+
+      document.querySelectorAll('.payment-view').forEach(el => el.style.display = 'none');
+      const activeView = document.getElementById('view-' + method);
+      if(activeView) activeView.style.display = 'block';
+  }
+
+  function updateCardPreview() {
+      const name = document.getElementById('input-name')?.value;
+      const number = document.getElementById('input-number')?.value;
+      const expiry = document.getElementById('input-expiry')?.value;
+
+      const previewName = document.getElementById('preview-name');
+      const previewNumber = document.getElementById('preview-number');
+      const previewExpiry = document.getElementById('preview-expiry');
+
+      if(previewName) previewName.innerText = name || "NAME ON CARD";
+      if(previewNumber) {
+          const formattedNum = (number || "").replace(/\W/gi, '').replace(/(.{4})/g, '$1 ').trim();
+          previewNumber.innerText = formattedNum || "**** **** **** ****";
+      }
+      if(previewExpiry) previewExpiry.innerText = expiry || "MM/YY";
+  }
+
+  /* =====================================================
+       2. PAYMENT LOGIC (Connects to Success Page)
+  ===================================================== */
+  const bookingId = document.getElementById("bookingId")?.value;
+
+  async function processPayment() {
+    const activeBtn = document.querySelector('.payment-view[style="display: block;"] .submit-btn');
+    
+    try {
+      if(activeBtn) {
+        activeBtn.disabled = true;
+        activeBtn.innerText = "Processing...";
+        activeBtn.style.opacity = "0.7";
+      }
+      
+      // ✅ Call the Fake Pay route to simulate successful payment
+      const res = await fetch("/bookings/fake-pay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId })
+      });
+
+      const data = await res.json();
+
+      // ✅ Redirect to the Success Page
+      if (data.success && data.redirectUrl) {
+          window.location.href = data.redirectUrl; 
+      } else {
+          throw new Error("Payment simulation failed");
+      }
+
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Something went wrong. Please try again.");
+      if(activeBtn) {
+        activeBtn.disabled = false;
+        activeBtn.innerText = "Submit & Pay";
+        activeBtn.style.opacity = "1";
+      }
+    }
+  }
+</script>
+</body>
+</html>

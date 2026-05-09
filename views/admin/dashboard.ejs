@@ -1,0 +1,292 @@
+<% layout("admin/layouts/admin-boilerplate") %>
+
+<section class="dashboard-grid">
+  <div class="col-left">
+    <div class="profile-card glass">
+      <div class="profile-left">
+        <img src="<%= currUser?.profileImage?.url || '/images/default-avatar.png' %>" alt="avatar" />
+      </div>
+      <div class="profile-body">
+        <h3><%= currUser?.username || 'Admin' %></h3>
+        <p class="muted">Administrator • Eazy-Logistics</p>
+        <div class="profile-stats">
+          <div><strong>Active</strong><span id="activeTimer">0m</span></div>
+          <div><strong>Listings</strong><span id="stat-listings">—</span></div>
+          <div><strong>Users</strong><span id="stat-users">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cards-row">
+      <div class="metric glass">
+        <small>Total Listings</small>
+        <h2 id="metricListings">—</h2>
+      </div>
+      <div class="metric glass">
+        <small>Total Users</small>
+        <h2 id="metricUsers">—</h2>
+      </div>
+      <div class="metric glass">
+        <small>Bookings</small>
+        <h2 id="metricBookings">—</h2>
+      </div>
+      <div class="metric glass">
+        <small>Revenue</small>
+        <h2 id="metricRevenue">—</h2>
+      </div>
+    </div>
+
+    <div class="cards-row">
+      <div class="metric glass">
+        <small>Pending Documents</small>
+        <h2 id="metricPendingDocs">—</h2>
+      </div>
+      <div class="metric glass">
+        <small>Safety Alerts</small>
+        <h2 id="metricSafetyAlerts">—</h2>
+      </div>
+      <div class="metric glass">
+        <small>Overdue Stays</small>
+        <h2 id="metricOverdue">—</h2>
+      </div>
+      <div class="metric glass">
+        <small>Admins Secured</small>
+        <h2 id="metricSecuredAdmins">—</h2>
+      </div>
+    </div>
+
+    <div class="panel glass">
+      <div class="panel-head">
+        <h4 id="chartTitle">Bookings & Revenue — Last 6 months</h4>
+        <div class="panel-actions">
+          <select id="chartRange">
+            <option value="6">6 months</option>
+            <option value="12">12 months</option>
+          </select>
+        </div>
+      </div>
+      <div class="panel-body">
+        <canvas id="adminMainChart"></canvas>
+      </div>
+    </div>
+
+    <div class="insights-row">
+      <div class="insight glass">
+        <h5>Top Cities</h5>
+        <ul id="topCities">
+          <li>Loading...</li>
+        </ul>
+      </div>
+
+      <div class="insight glass">
+        <h5>Trust & Safety</h5>
+        <ul id="safetyAlerts">
+          <li>Loading...</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <aside class="col-right">
+    <div class="panel glass">
+      <h4>Recent Bookings</h4>
+      <ul id="upcomingBookings">
+        <li>Loading...</li>
+      </ul>
+      <a class="btn-link" href="/admin/bookings">Manage bookings</a>
+    </div>
+
+    <div class="panel glass">
+      <h4>Admin Security</h4>
+      <div class="health-item">
+        <label>Admins with 12-digit code</label>
+        <progress id="securityCodeProgress" value="0" max="1"></progress>
+      </div>
+      <div class="health-item">
+        <label>Admins with face authentication</label>
+        <progress id="passkeyAdminProgress" value="0" max="1"></progress>
+      </div>
+      <div style="font-size:12px; color:#64748b;">
+        Secured admins: <span id="securedAdminsText">—</span><br>
+        Face-auth admins: <span id="passkeyAdminsText">—</span>
+      </div>
+    </div>
+
+    <div class="panel glass">
+      <h4>Quick Actions</h4>
+      <div class="btns">
+        <a class="btn primary" href="/listings/new">Add Listing</a>
+        <a class="btn ghost" href="/admin/users">Manage Admins</a>
+        <a class="btn ghost" href="/admin/listings">Verify Documents</a>
+      </div>
+    </div>
+  </aside>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const activeSpan = document.getElementById("activeTimer");
+  const todayKey = () => new Date().toISOString().split("T")[0];
+
+  let activeSeconds = parseInt(localStorage.getItem("activeTime") || "0", 10);
+  let lastUpdate = Date.now();
+  let storedDate = localStorage.getItem("activeDate");
+
+  if (storedDate !== todayKey()) {
+    activeSeconds = 0;
+    localStorage.setItem("activeTime", "0");
+    localStorage.setItem("activeDate", todayKey());
+  }
+
+  function updateActiveTime() {
+    const now = Date.now();
+    if (document.visibilityState === "visible") {
+      const delta = Math.floor((now - lastUpdate) / 1000);
+      if (delta > 0) {
+        activeSeconds += delta;
+        localStorage.setItem("activeTime", activeSeconds.toString());
+      }
+    }
+
+    lastUpdate = now;
+    const h = Math.floor(activeSeconds / 3600);
+    const m = Math.floor((activeSeconds % 3600) / 60);
+    if (activeSpan) activeSpan.textContent = h > 0 ? `${h}h ${m}m` : `${m}m`;
+  }
+
+  setInterval(() => {
+    if (localStorage.getItem("activeDate") !== todayKey()) {
+      activeSeconds = 0;
+      localStorage.setItem("activeTime", "0");
+      localStorage.setItem("activeDate", todayKey());
+    }
+    updateActiveTime();
+  }, 1000);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      lastUpdate = Date.now();
+    }
+  });
+
+  updateActiveTime();
+
+  loadDashboardData();
+
+  const ctx = document.getElementById("adminMainChart");
+  let adminChart;
+
+  async function loadDashboardData() {
+    try {
+      const res = await fetch("/admin/api/summary");
+      const data = await res.json();
+
+      if (!data.ok) return;
+
+      document.getElementById("metricListings").innerText = data.listingsCount;
+      document.getElementById("metricUsers").innerText = data.usersCount;
+      document.getElementById("metricBookings").innerText = data.bookingsCount;
+      document.getElementById("metricRevenue").innerText = "Rs." + (data.revenue || 0).toLocaleString("en-IN");
+      document.getElementById("metricPendingDocs").innerText = data.pendingDocumentReviews || 0;
+      document.getElementById("metricSafetyAlerts").innerText = data.safetyAlertCount || 0;
+      document.getElementById("metricOverdue").innerText = data.overdueCount || 0;
+      document.getElementById("metricSecuredAdmins").innerText = data.securedAdmins || 0;
+
+      document.getElementById("stat-listings").innerText = data.listingsCount;
+      document.getElementById("stat-users").innerText = data.usersCount;
+
+      const bookingsList = document.getElementById("upcomingBookings");
+      if (data.recentBookings && data.recentBookings.length > 0) {
+        bookingsList.innerHTML = data.recentBookings.slice(0, 5).map((b) => `
+          <li>
+            <div class="bk-info">
+              <strong>${b.listingTitle}</strong>
+              <small>${b.guestName} • ${new Date(b.createdAt).toLocaleDateString()}</small>
+            </div>
+            <div class="bk-price">Rs.${b.totalPrice.toLocaleString()}</div>
+          </li>
+        `).join("");
+      } else {
+        bookingsList.innerHTML = "<li>No recent bookings</li>";
+      }
+
+      const cityList = document.getElementById("topCities");
+      cityList.innerHTML = (data.topCities && data.topCities.length > 0)
+        ? data.topCities.map((c) => `
+            <li>
+              <span>${c._id}</span>
+              <span class="badge">${c.count}</span>
+            </li>
+          `).join("")
+        : "<li>No data available</li>";
+
+      const safetyList = document.getElementById("safetyAlerts");
+      safetyList.innerHTML = (data.safetyAlerts && data.safetyAlerts.length > 0)
+        ? data.safetyAlerts.map((alert) => `
+            <li>
+              <strong>${alert.listingTitle}</strong>
+              <div style="font-size:12px; color:#64748b;">${alert.guestName} • ${alert.location || "Unknown location"}</div>
+              <div style="font-size:12px; color:${alert.stayStatus === "safety_alert" ? "#dc2626" : "#b45309"};">
+                ${alert.stayStatus.replace("_", " ")} - ${alert.hoursOverdue}h overdue - dispatch: ${(alert.dispatchStatus || "not_requested").replace("_", " ")}${alert.dispatchReference ? ` (${alert.dispatchReference})` : ""}
+              </div>
+            </li>
+          `).join("")
+        : "<li>No active safety alerts</li>";
+
+      const maxAdminBase = Math.max(data.securedAdmins || 1, data.passkeyAdmins || 1, 1);
+      document.getElementById("securityCodeProgress").max = maxAdminBase;
+      document.getElementById("securityCodeProgress").value = data.securedAdmins || 0;
+      document.getElementById("passkeyAdminProgress").max = maxAdminBase;
+      document.getElementById("passkeyAdminProgress").value = data.passkeyAdmins || 0;
+      document.getElementById("securedAdminsText").innerText = data.securedAdmins || 0;
+      document.getElementById("passkeyAdminsText").innerText = data.passkeyAdmins || 0;
+
+      loadChartData(6);
+    } catch (error) {
+      console.error("Dashboard Data Error:", error);
+    }
+  }
+
+  async function loadChartData(months) {
+    try {
+      const res = await fetch(`/admin/api/earnings/monthly?months=${months}`);
+      const data = await res.json();
+
+      if (!data.ok) return;
+
+      if (adminChart) adminChart.destroy();
+      adminChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: data.labels,
+          datasets: [{
+            label: "Revenue (Rs.)",
+            data: data.revenue,
+            borderColor: "#4338ca",
+            backgroundColor: "rgba(67, 56, 202, 0.1)",
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: "#f3f4f6" } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Chart Error:", error);
+    }
+  }
+
+  document.getElementById("chartRange").addEventListener("change", (event) => {
+    loadChartData(event.target.value);
+  });
+});
+</script>

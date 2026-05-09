@@ -1,0 +1,303 @@
+<% layout("layouts/boilerplate") %>
+
+<style>
+  /* --- 1. LAYOUT WRAPPER --- */
+  .signup-page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 85vh; /* Occupies mostly full height */
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden; /* Contains the background animation */
+    background-color: #f7f7f7;
+  }
+
+  /* --- 2. ANIMATED BACKGROUND (Scoped to this section) --- */
+  .bg-pattern {
+    position: absolute;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background-image: 
+      linear-gradient(rgba(227, 28, 95, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(227, 28, 95, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: patternDrift 60s linear infinite;
+    z-index: 0;
+  }
+
+  @keyframes patternDrift {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-40px, -40px); }
+  }
+
+  .vignette {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle, transparent 40%, #f7f7f7 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* --- 3. SIGNUP CARD --- */
+  .signup-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 450px;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    position: relative;
+    border: 1px solid #eaeaea;
+    z-index: 10;
+    transition: transform 0.3s ease;
+  }
+  
+  .signup-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  /* --- 4. LOGO & HEADER --- */
+  .logo-container {
+    width: 70px;
+    height: 70px;
+    background: white;
+    border-radius: 50%;
+    margin: 0 auto 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+  .logo-img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+  }
+
+  h2 { font-weight: 800; color: #222; margin: 0 0 5px; font-size: 24px; }
+  p.subtitle { color: #717171; font-size: 14px; margin-bottom: 25px; font-weight: 500; }
+
+  /* --- 5. SOCIAL BUTTONS --- */
+  .social-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 25px;
+  }
+  .social-btn {
+    height: 45px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #222;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .social-btn:hover { border-color: #222; background: #f7f7f7; transform: translateY(-2px); }
+  .social-btn[aria-disabled="true"] { opacity: 0.45; pointer-events: none; }
+  .social-btn .fa-google { color: #DB4437; }
+  .social-btn .fa-facebook-f { color: #1877F2; }
+  .social-btn .fa-linkedin-in { color: #0077b5; }
+  .social-btn .fa-apple { color: #000; }
+
+  /* Divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    color: #717171;
+    font-size: 12px;
+    margin: 25px 0;
+    font-weight: 600;
+  }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #ddd; }
+  .divider span { padding: 0 10px; }
+
+  /* --- 6. INPUT FIELDS --- */
+  .form-group { margin-bottom: 15px; text-align: left; }
+  .form-label { font-size: 12px; font-weight: 700; color: #222; margin-bottom: 5px; display: block; margin-left: 2px; }
+  
+  .custom-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #b0b0b0;
+    border-radius: 10px;
+    font-size: 15px;
+    transition: 0.2s;
+    outline: none;
+    color: #222;
+    background: #fff;
+  }
+  .custom-input:focus { border-color: #E31C5F; box-shadow: 0 0 0 3px rgba(227, 28, 95, 0.1); }
+
+  /* --- 7. BUTTONS --- */
+  .btn-signup {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(90deg, #E61E4D 0%, #E31C5F 50%, #D70466 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 12px rgba(230, 30, 77, 0.25);
+  }
+  .btn-signup:hover { transform: scale(1.02); }
+
+  .footer-text { margin-top: 25px; font-size: 13px; color: #717171; }
+  .footer-text a { color: #222; font-weight: 600; text-decoration: underline; }
+
+  /* --- 8. ADMIN TOGGLE --- */
+  .admin-toggle {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #717171;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    transition: 0.2s;
+  }
+  .admin-toggle:hover { background: #f0f0f0; color: #000; }
+
+  /* Admin Mode Styling */
+  .admin-mode .btn-signup { background: #222; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+  .admin-mode .logo-container { border: 2px solid #222; }
+</style>
+
+<div class="signup-page-container">
+    
+    <div class="bg-pattern"></div>
+    <div class="vignette"></div>
+
+    <div class="signup-card" id="signupCard">
+        
+        <div class="logo-container">
+            <img src="/images/logo.png" alt="Logo" class="logo-img" onerror="this.src='https://img.icons8.com/color/48/airbnb.png'">
+        </div>
+        
+        <h2 id="pageTitle">Create account</h2>
+        <p class="subtitle">Join Eazy-Logistics today.</p>
+
+        <div class="social-grid">
+            <a href="<%= socialAuthEnabled.apple ? '/auth/apple' : '#' %>" class="social-btn" title="<%= socialAuthEnabled.apple ? 'Apple' : 'Apple (Coming soon)' %>" <%= socialAuthEnabled.apple ? '' : 'aria-disabled=\"true\"' %>><i class="fa-brands fa-apple"></i></a>
+            <a href="<%= socialAuthEnabled.google ? '/auth/google' : '#' %>" class="social-btn" title="<%= socialAuthEnabled.google ? 'Google' : 'Google (Coming soon)' %>" <%= socialAuthEnabled.google ? '' : 'aria-disabled=\"true\"' %>><i class="fa-brands fa-google"></i></a>
+            <a href="<%= socialAuthEnabled.facebook ? '/auth/facebook' : '#' %>" class="social-btn" title="<%= socialAuthEnabled.facebook ? 'Facebook' : 'Facebook (Coming soon)' %>" <%= socialAuthEnabled.facebook ? '' : 'aria-disabled=\"true\"' %>><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="<%= socialAuthEnabled.linkedin ? '/auth/linkedin' : '#' %>" class="social-btn" title="<%= socialAuthEnabled.linkedin ? 'LinkedIn' : 'LinkedIn (Coming soon)' %>" <%= socialAuthEnabled.linkedin ? '' : 'aria-disabled=\"true\"' %>><i class="fa-brands fa-linkedin-in"></i></a>
+        </div>
+
+        <div class="divider"><span>OR REGISTER WITH EMAIL</span></div>
+
+        <form action="/signup" method="POST" class="needs-validation" novalidate>
+
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input name="username" id="username" type="text" class="custom-input" placeholder="Choose a username" minlength="3" maxlength="30" autocomplete="username" required />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input name="email" id="email" type="email" class="custom-input" placeholder="name@example.com" autocomplete="email" required />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input name="password" id="password" type="password" class="custom-input" placeholder="••••••••" required />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                <input name="confirmPassword" id="confirmPassword" type="password" class="custom-input" placeholder="********" autocomplete="new-password" required />
+            </div>
+
+            <div style="margin-top:-8px; margin-bottom:12px; font-size:11px; color:#717171; text-align:left;">
+                Use 8+ chars with uppercase, lowercase, number, and special character.
+            </div>
+
+            <div style="display: none;">
+                <select name="role" id="roleSelect" class="form-control">
+                    <option value="user" selected>User Account</option>
+                    <option value="admin">Admin Account</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="adminPermissionWrap" style="display:none;">
+                <label class="form-label">Admin Permission Code</label>
+                <input
+                  name="adminPermissionCode"
+                  id="adminPermissionCode"
+                  type="text"
+                  class="custom-input"
+                  placeholder="Enter 12-digit code from existing admin"
+                  inputmode="numeric"
+                  pattern="[0-9]{12}"
+                  maxlength="12"
+                  autocomplete="one-time-code"
+                />
+                <div style="margin-top:6px; font-size:11px; color:#717171;">
+                  New admin signup requires approval from an existing admin.
+                </div>
+            </div>
+
+            <button class="btn-signup" id="submitBtn">Agree and Continue</button>
+        </form>
+
+        <div class="footer-text">
+            Already have an account? <a href="/login">Login</a>
+        </div>
+
+        <div class="admin-toggle" onclick="toggleAdminMode()">
+            <i class="fa-solid fa-user-shield"></i> <span id="adminText">Sign up as Admin</span>
+        </div>
+
+        <div style="margin-top:10px; font-size:12px; color:#717171;">
+            Admin accounts need an existing admin permission code and then receive a 12-digit security code by email.
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let isAdmin = false;
+
+    function toggleAdminMode() {
+        const card = document.getElementById('signupCard');
+        const btn = document.getElementById('submitBtn');
+        const title = document.getElementById('pageTitle');
+        const adminText = document.getElementById('adminText');
+        const roleSelect = document.getElementById('roleSelect');
+        const adminPermissionWrap = document.getElementById('adminPermissionWrap');
+        const adminPermissionCode = document.getElementById('adminPermissionCode');
+
+        isAdmin = !isAdmin;
+
+        if (isAdmin) {
+            roleSelect.value = "admin"; 
+            card.classList.add('admin-mode'); 
+            btn.innerText = "Create Admin Account";
+            title.innerText = "Admin Signup";
+            adminText.innerText = "Sign up as User";
+            adminPermissionWrap.style.display = "block";
+            adminPermissionCode.required = false;
+        } else {
+            roleSelect.value = "user";
+            card.classList.remove('admin-mode');
+            btn.innerText = "Agree and Continue";
+            title.innerText = "Create account";
+            adminText.innerText = "Sign up as Admin";
+            adminPermissionWrap.style.display = "none";
+            adminPermissionCode.required = false;
+            adminPermissionCode.value = "";
+        }
+    }
+</script>

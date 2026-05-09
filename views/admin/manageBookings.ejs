@@ -1,0 +1,203 @@
+<% layout("admin/layouts/admin-boilerplate") %>
+
+<div class="panel glass">
+  <div class="panel-head">
+    <h4>Bookings Manager</h4>
+    <div>
+      <input id="bookingsSearch" placeholder="Search guest name..." />
+
+      <select id="bookingsStatusFilter">
+        <option value="">All Statuses</option>
+        <option value="pending">Pending</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="cancelled">Cancelled</option>
+        <option value="refunded">Refunded</option>
+      </select>
+
+      <button id="btnReloadBookings" class="btn ghost">Reload</button>
+    </div>
+  </div>
+
+  <div class="panel-body">
+    <table id="bookingsTable" class="admin-table" style="width:100%">
+      <thead>
+        <tr>
+          <th>Listing</th>
+          <th>Guest</th>
+          <th>Price</th>
+          <th>Dates</th>
+          <th>Status</th>
+          <th>Stay Safety</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div id="bookingsPagination"></div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const body = document.querySelector("#bookingsTable tbody");
+  const search = document.getElementById("bookingsSearch");
+  const status = document.getElementById("bookingsStatusFilter");
+  const btnReload = document.getElementById("btnReloadBookings");
+  let page = 1;
+  const limit = 12;
+
+  async function load() {
+    const q = encodeURIComponent(search.value || "");
+    const st = encodeURIComponent(status.value || "");
+    const res = await fetch(`/admin/api/bookings?page=${page}&limit=${limit}&q=${q}&status=${st}`);
+    const data = await res.json();
+
+    body.innerHTML = data.bookings.map((booking) => {
+      const title = booking.listing ? booking.listing.title : "Deleted";
+      const guest = `${booking.firstName || "Guest"} ${booking.lastName || ""}`.trim();
+      const checkIn = booking.checkIn ? new Date(booking.checkIn).toLocaleDateString("en-IN") : "-";
+      const checkOut = booking.checkOut ? new Date(booking.checkOut).toLocaleDateString("en-IN") : "-";
+      const stayStatus = (booking.stayStatus || "upcoming").replace("_", " ");
+      const dispatchStatus = (booking.dispatchStatus || "not_requested").replace("_", " ");
+
+      return `
+        <tr>
+          <td style="font-weight:600">${escapeHtml(title)}</td>
+          <td>
+            <div>${escapeHtml(guest)}</div>
+            <div style="font-size:11px; color:#64748b;">${escapeHtml(booking.email || "")}</div>
+          </td>
+          <td>Rs.${Number(booking.totalPrice || 0).toLocaleString("en-IN")}</td>
+          <td style="font-size:13px; color:#666;">
+            ${checkIn}<br>${checkOut}
+          </td>
+          <td>
+            <span class="badge ${getStatusClass(booking.status)}">${booking.status}</span>
+          </td>
+          <td>
+            <span class="badge ${getSafetyClass(booking.stayStatus)}">${stayStatus}</span>
+            ${booking.hoursOverdue > 0 ? `<div style="font-size:11px; color:#b45309; margin-top:4px;">${booking.hoursOverdue}h overdue</div>` : ""}
+            ${booking.policeLogged ? `<div style="font-size:11px; color:#dc2626; margin-top:4px;">Emergency escalation logged</div>` : ""}
+            <div style="font-size:11px; color:${booking.dispatchStatus === "sent" ? "#166534" : booking.dispatchStatus === "failed" ? "#b91c1c" : "#475569"}; margin-top:4px;">
+              Dispatch: ${escapeHtml(dispatchStatus)}
+            </div>
+            ${booking.dispatchReference ? `<div style="font-size:11px; color:#334155; margin-top:2px;">Ref: ${escapeHtml(booking.dispatchReference)}</div>` : ""}
+            ${booking.dispatchStatus === "failed" && booking.dispatchMessage ? `<div style="font-size:11px; color:#991b1b; margin-top:2px;">${escapeHtml(booking.dispatchMessage)}</div>` : ""}
+          </td>
+          <td>
+            <div style="display:flex; gap:5px; flex-wrap:wrap;">
+              ${getButtons(booking)}
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    setupPagination(data.total);
+  }
+
+  function getButtons(booking) {
+    if (booking.status === "cancelled") return '<button class="btn btn-sm btn-secondary" disabled>Cancelled</button>';
+    if (booking.status === "refunded") return '<button class="btn btn-sm btn-secondary" disabled>Refunded</button>';
+
+    let buttons = "";
+    if (booking.status !== "confirmed") {
+      buttons += `<button class="btn ghost" onclick="approveBooking('${booking._id}')">Approve</button>`;
+    }
+    if (booking.status === "confirmed") {
+      if (booking.stayStatus === "safety_alert" && booking.dispatchStatus !== "sent") {
+        buttons += `<button class="btn ghost" onclick="dispatchPolice('${booking._id}')">Dispatch Police</button>`;
+      }
+      buttons += `<button class="btn ghost btn-danger" style="color:red" onclick="cancelBooking('${booking._id}')">Cancel</button>`;
+      buttons += `<button class="btn" onclick="refundBooking('${booking._id}')">Refund</button>`;
+    } else {
+      buttons += `<button class="btn ghost" onclick="cancelBooking('${booking._id}')">Cancel</button>`;
+    }
+    return buttons;
+  }
+
+  function getStatusClass(status) {
+    if (status === "confirmed") return "success";
+    if (status === "cancelled") return "danger";
+    if (status === "pending") return "warning";
+    return "secondary";
+  }
+
+  function getSafetyClass(status) {
+    if (status === "checked_out") return "success";
+    if (status === "safety_alert" || status === "overdue") return "danger";
+    return "warning";
+  }
+
+  function setupPagination(total) {
+    const pages = Math.ceil(total / limit);
+    const pEl = document.getElementById("bookingsPagination");
+    let html = "";
+    for (let i = 1; i <= pages; i++) {
+      html += `<button class="btn ghost ${i === page ? "active" : ""}" data-page="${i}">${i}</button>`;
+    }
+    pEl.innerHTML = html;
+    pEl.querySelectorAll("button").forEach((button) => {
+      button.addEventListener("click", () => {
+        page = Number(button.dataset.page);
+        load();
+      });
+    });
+  }
+
+  window.approveBooking = async function(id) {
+    if (!confirm("Approve this booking?")) return;
+    await fetch(`/admin/api/bookings/${id}/approve`, { method: "PUT" });
+    load();
+  };
+
+  window.cancelBooking = async function(id) {
+    if (!confirm("Are you sure you want to cancel this booking?")) return;
+    await fetch(`/admin/api/bookings/${id}/cancel`, { method: "PUT" });
+    load();
+  };
+
+  window.refundBooking = async function(id) {
+    if (!confirm("Process refund?")) return;
+    await fetch(`/admin/api/bookings/${id}/refund`, { method: "PUT" });
+    load();
+  };
+
+  window.dispatchPolice = async function(id) {
+    if (!confirm("Send police dispatch alert for this booking?")) return;
+    await fetch(`/admin/api/bookings/${id}/dispatch-police`, { method: "POST" });
+    load();
+  };
+
+  btnReload.addEventListener("click", load);
+  search.addEventListener("input", debounce(() => {
+    page = 1;
+    load();
+  }, 300));
+  status.addEventListener("change", () => {
+    page = 1;
+    load();
+  });
+
+  function debounce(fn, delay = 300) {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), delay);
+    };
+  }
+
+  function escapeHtml(value = "") {
+    return String(value).replace(/[&<>"'`]/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+      "`": "&#96;"
+    }[char]));
+  }
+
+  load();
+});
+</script>

@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Booking Confirmed - Receipt</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+  
+  <style>
+    /* =========================================
+       1. RECEIPT STYLING
+    ========================================= */
+    body {
+      background-color: #f3f4f6;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      padding: 40px 20px;
+      color: #1f2937;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .receipt-container {
+      background: #ffffff;
+      width: 100%;
+      max-width: 800px;
+      padding: 60px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+      border-radius: 8px;
+    }
+
+    /* --- HEADER --- */
+    .receipt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 50px;
+      border-bottom: 2px solid #a91b0d;
+      padding-bottom: 20px;
+    }
+
+    .company-branding img { height: 60px; margin-bottom: 10px; }
+    .company-branding h1 { margin: 0; font-size: 24px; font-weight: 800; color: #a91b0d; text-transform: uppercase; letter-spacing: 1px; }
+    .company-branding p { margin: 5px 0 0; font-size: 12px; color: #6b7280; }
+
+    .receipt-title { text-align: right; }
+    .receipt-title h2 { margin: 0; font-size: 36px; color: #a91b0d; font-family: serif; font-weight: 700; font-style: italic; }
+    .receipt-meta { margin-top: 10px; font-size: 13px; color: #374151; }
+
+    /* --- INFO GRID --- */
+    .info-grid { display: flex; justify-content: space-between; margin-bottom: 40px; }
+    .info-col h3 { font-size: 14px; font-weight: 700; color: #a91b0d; text-transform: uppercase; margin-bottom: 10px; }
+    .info-col p { margin: 0 0 5px; font-size: 14px; color: #4b5563; }
+
+    /* --- TABLE STYLING --- */
+    .booking-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    .booking-table th { text-align: left; padding: 12px 0; color: #a91b0d; font-size: 13px; text-transform: uppercase; border-bottom: 1px solid #e5e7eb; }
+    .booking-table td { padding: 16px 0; border-bottom: 1px solid #f3f4f6; font-size: 14px; color: #111; }
+    .booking-table td.right, .booking-table th.right { text-align: right; }
+
+    /* --- TOTALS SECTION --- */
+    .totals-section { display: flex; justify-content: flex-end; margin-top: 20px; }
+    .totals-box { width: 300px; }
+    .total-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; color: #4b5563; }
+    .total-row.final {
+      border-top: 2px solid #a91b0d;
+      margin-top: 10px;
+      padding-top: 15px;
+      font-weight: 800;
+      font-size: 20px;
+      color: #111;
+    }
+
+    /* --- FOOTER --- */
+    .receipt-footer { margin-top: 60px; display: flex; justify-content: space-between; align-items: flex-end; }
+    .signature-box { text-align: center; border-top: 1px solid #d1d5db; padding-top: 10px; width: 200px; }
+    .signature-box p { margin: 0; font-size: 12px; font-weight: 600; color: #374151; }
+    .thank-you { font-family: serif; font-style: italic; color: #a91b0d; font-size: 18px; }
+
+    /* --- BUTTONS --- */
+    .action-area { text-align: center; margin-top: 40px; border-top: 1px dashed #e5e7eb; padding-top: 30px; }
+    
+    .btn-group {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    /* Primary Button (Download) */
+    .download-btn {
+      background-color: #a91b0d;
+      color: white;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.2s;
+      border: 1px solid #a91b0d;
+    }
+    .download-btn:hover { background-color: #801309; }
+
+    /* Secondary Button (Back to Property) */
+    .back-btn {
+      background-color: white;
+      color: #a91b0d;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.2s;
+      border: 1px solid #a91b0d;
+    }
+    .back-btn:hover { background-color: #fef2f2; }
+
+
+    @media print {
+      body { background: white; }
+      .receipt-container { box-shadow: none; padding: 0; }
+      .action-area { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <% 
+      let baseAmount = booking.totalPrice; 
+      let taxAmount = baseAmount * 0.18; 
+      let grandTotal = baseAmount + taxAmount; 
+  %>
+
+  <div class="receipt-container">
+    
+    <div class="receipt-header">
+      <div class="company-branding">
+        <img src="/images/logo.png" alt="Eazy-Logistics Logo" onerror="this.style.display='none'"> 
+        <h1>Eazy-Logistics</h1>
+        <p>123, Tech Sector, Bangalore, India</p>
+        <p>eazylogistics07@gmail.com | +91 98765 43210</p>
+      </div>
+
+      <div class="receipt-title">
+        <h2>Receipt</h2>
+        <div class="receipt-meta">
+          <p><strong>Receipt #:</strong> #INV-<%= booking._id.toString().slice(-6).toUpperCase() %></p>
+          <p><strong>Date:</strong> <%= new Date().toLocaleDateString('en-IN') %></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-col">
+        <h3>Customer Details</h3>
+        <p><strong>Name:</strong> <%= booking.firstName %> <%= booking.lastName %></p>
+        <p><strong>Email:</strong> <%= booking.email %></p>
+        <p><strong>Phone:</strong> <%= booking.phone %></p>
+        <p><strong>Address:</strong> <%= booking.address || 'N/A' %></p>
+      </div>
+      <div class="info-col" style="text-align: right;">
+        <h3>Booking Details</h3>
+        <p><strong>Check-In:</strong> <%= new Date(booking.checkIn).toLocaleDateString('en-IN') %></p>
+        <p><strong>Check-Out:</strong> <%= new Date(booking.checkOut).toLocaleDateString('en-IN') %></p>
+        <p><strong>Guests:</strong> <%= booking.guests %></p>
+        <p><strong>Status:</strong> <span style="color:green; font-weight:700;">Confirmed / Paid</span></p>
+      </div>
+    </div>
+
+    <table class="booking-table">
+      <thead>
+        <tr>
+          <th width="50%">Description</th>
+          <th width="15%" class="right">Price/Night</th>
+          <th width="15%" class="right">Nights</th>
+          <th width="20%" class="right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <strong><%= booking.listing && booking.listing.title ? booking.listing.title : 'Accommodation' %></strong><br>
+            <span style="font-size:12px; color:#666;"><%= booking.roomType || 'Standard' %> Room</span>
+          </td>
+          <td class="right">₹<%= (baseAmount / (booking.nights || 1)).toLocaleString("en-IN") %></td>
+          <td class="right"><%= booking.nights || 1 %></td>
+          <td class="right">₹<%= baseAmount.toLocaleString("en-IN") %></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="totals-section">
+      <div class="totals-box">
+        <div class="total-row">
+          <span>Subtotal</span>
+          <span>₹<%= baseAmount.toLocaleString("en-IN") %></span>
+        </div>
+        <div class="total-row">
+          <span>GST (18%)</span>
+          <span>₹<%= taxAmount.toLocaleString("en-IN", {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></span>
+        </div>
+        <div class="total-row final">
+          <span>Grand Total</span>
+          <span>₹<%= grandTotal.toLocaleString("en-IN", {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="receipt-footer">
+      <div class="thank-you">Thank you for your business!</div>
+      <div class="signature-box">
+        <% 
+            /* CHECK FOR HOST SIGNATURE 
+               If the host has uploaded a signature, use it.
+               Otherwise, fallback to default system signature.
+            */
+            let sigSource = "/images/signature.png"; 
+            if (booking.listing && booking.listing.owner && booking.listing.owner.signature && booking.listing.owner.signature.url) {
+                sigSource = booking.listing.owner.signature.url;
+            }
+        %>
+        <img src="<%= sigSource %>" alt="Authorized Signature" style="height:40px; opacity:0.6; display:block; margin:0 auto 5px auto; mix-blend-mode: multiply;" onerror="this.style.display='none'">
+        <p>Authorized Signature</p>
+      </div>
+    </div>
+
+    <div class="action-area">
+      <div class="btn-group">
+        <a href="/listings/<%= booking.listing ? booking.listing._id : '' %>" class="back-btn">
+          &larr; Back to Property
+        </a>
+
+        <a href="/bookings/download/<%= booking._id %>" class="download-btn">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          Download Receipt (PDF)
+        </a>
+      </div>
+      <p style="font-size:12px; color:#999; margin-top:10px;">A copy of this receipt has been sent to <%= booking.email %></p>
+    </div>
+
+  </div>
+
+</body>
+</html>

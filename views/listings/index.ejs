@@ -1,0 +1,184 @@
+<% layout("layouts/boilerplate") %>
+
+<style>
+  #filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter {
+    text-align: center;
+    margin-right: 2rem;
+    margin-top: 2rem;
+    opacity: 0.6;
+    transition: .3s;
+  }
+
+  .filter:hover,
+  .filter.active {
+    opacity: 1;
+    cursor: pointer;
+  }
+
+  .filter p {
+    font-size: .8rem;
+  }
+
+  .tax-info {
+    display: none;
+  }
+
+  .tax-toggle {
+    border: 1px solid #000;
+    border-radius: 1rem;
+    height: 3.25rem;
+    padding: 1rem;
+    margin-left: 2rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .flash-message {
+    background-color: #fff5e1;
+    color: #8b5e00;
+    border: 1px solid #ffd580;
+    border-radius: 10px;
+    padding: 15px 25px;
+    text-align: center;
+    width: fit-content;
+    margin: 3rem auto;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    font-weight: 500;
+  }
+</style>
+
+<!-- CATEGORY FILTER BAR -->
+<div id="filters">
+  <% const categories = [
+    ["Trending", "fa-fire"],
+    ["Rooms", "fa-bed"],
+    ["Iconic Citys", "fa-mountain-city"],
+    ["Mountain", "fa-mountain"],
+    ["Castles", "fa-fort-awesome"],
+    ["Amazing Pools", "fa-person-swimming"],
+    ["Camping", "fa-campground"],
+    ["Farms", "fa-cow"],
+    ["Arctic", "fa-snowflake"],
+    ["Domes", "fa-igloo"],
+    ["Boats", "fa-ship"]
+  ]; %>
+
+  <% categories.forEach(([label, icon]) => { %>
+    <div class="filter" data-category="<%= label %>">
+      <div><i class="fa-solid <%= icon %>"></i></div>
+      <p><%= label %></p>
+    </div>
+  <% }) %>
+
+  <div class="tax-toggle">
+    <div class="form-check-reverse form-switch">
+      <input class="form-check-input" type="checkbox" id="switchCheckDefault" />
+      <label class="form-check-label" for="switchCheckDefault">Total with tax</label>
+    </div>
+  </div>
+</div>
+
+<!-- LISTING CONTAINER -->
+<div id="listingContainer" class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-3">
+
+  <% allListings.forEach(listing => { %>
+
+    <% 
+      const firstImg =
+        listing.images?.[0]?.url ||   // NEW multi-image system
+        listing.image?.url     ||     // OLD single-image system
+        "/images/default.jpg";        // fallback
+    %>
+
+    <a href="/listings/<%= listing._id %>" class="listing-link">
+      <div class="card col mb-4">
+
+        <img src="<%= firstImg %>" 
+             class="card-img-top"
+             style="height:20rem; object-fit:cover;" />
+
+        <div class="card-body">
+          <p class="card-text">
+            <b><%= listing.title %></b><br />
+            ₹<%= listing.price.toLocaleString("en-IN") %> /night
+            <i class="tax-info"> +18% GST</i>
+          </p>
+        </div>
+
+      </div>
+    </a>
+
+  <% }) %>
+
+</div>
+
+<script>
+  // Tax toggle
+  document.getElementById("switchCheckDefault").onclick = () => {
+    document.querySelectorAll(".tax-info").forEach(info => {
+      info.style.display = 
+        info.style.display === "inline" ? "none" : "inline";
+    });
+  };
+
+  // Category click fetch
+  document.querySelectorAll(".filter").forEach(filter => {
+    filter.addEventListener("click", async () => {
+      const category = filter.dataset.category;
+
+      document.querySelectorAll(".filter").forEach(f => f.classList.remove("active"));
+      filter.classList.add("active");
+
+      const res = await fetch(
+        `/api/listings/search?category=${encodeURIComponent(category)}`
+      );
+
+      const data = await res.json();
+      renderListings(data.results);
+    });
+  });
+
+  // Render listings
+  function renderListings(listings) {
+    const container = document.getElementById("listingContainer");
+    container.innerHTML = "";
+
+    if (!listings || listings.length === 0) {
+      container.innerHTML = `
+        <div class="flash-message">
+          <i class="fa-solid fa-circle-info"></i> No listings found.
+        </div>`;
+      return;
+    }
+
+    listings.forEach(listing => {
+      const img =
+        listing.images?.[0]?.url ||
+        listing.image?.url ||
+        "/images/default.jpg";
+
+      const html = `
+        <a href="/listings/${listing._id}" class="listing-link">
+          <div class="card col mb-4">
+            <img src="${img}" 
+                 class="card-img-top"
+                 style="height:20rem; object-fit:cover;">
+            <div class="card-body">
+              <p class="card-text">
+                <b>${listing.title}</b><br />
+                ₹${listing.price.toLocaleString("en-IN")} /night
+              </p>
+            </div>
+          </div>
+        </a>
+      `;
+      container.insertAdjacentHTML("beforeend", html);
+    });
+  }
+</script>

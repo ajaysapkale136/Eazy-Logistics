@@ -1,0 +1,1782 @@
+<% layout("layouts/boilerplate") %>
+
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css" type="text/css">
+
+<script>
+  const mapToken = "<%= process.env.MAP_TOKEN %>";
+  const listing = <%- JSON.stringify(listing) %>;
+  const nearbyListings = <%- typeof nearbyListings !== 'undefined' ? JSON.stringify(nearbyListings) : '[]' %>;
+</script>
+
+<style>
+  :root {
+      --listing-brand: #fe424d;
+      --listing-brand-deep: #d72f3a;
+      --listing-ink: #0f172a;
+      --listing-muted: #64748b;
+      --listing-line: #dbe4ef;
+      --listing-soft: #fff5f6;
+      --listing-success: #15803d;
+  }
+
+  /* --- MAP MARKERS --- */
+  .marker-home {
+      background-color: #e51d53;
+      width: 45px; height: 45px;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 20px; z-index: 5;
+  }
+  .marker-nearby {
+      background: white;
+      padding: 5px 10px; border-radius: 20px;
+      font-weight: bold; font-size: 13px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      cursor: pointer; color: #222; border: 1px solid #ddd;
+      transition: transform 0.2s;
+  }
+  .marker-nearby:hover { transform: scale(1.1); z-index: 10; background: #222; color: white; }
+  .marker-nearby.is-active { transform: scale(1.12); background: #fe424d; color: #fff; border-color: #fe424d; }
+  .marker-poi {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #0f172a;
+      color: #fff;
+      border: 2px solid #fff;
+      box-shadow: 0 7px 16px rgba(15, 23, 42, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+  }
+  .map-tools {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+  }
+  .map-tool-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+  }
+  .map-tool-btn {
+      border: 1px solid rgba(15, 23, 42, 0.14);
+      background: #fff;
+      color: #334155;
+      border-radius: 999px;
+      padding: 0.42rem 0.75rem;
+      font-size: 0.82rem;
+      font-weight: 800;
+      transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  }
+  .map-tool-btn:hover,
+  .map-tool-btn.active {
+      transform: translateY(-1px);
+      background: #fe424d;
+      border-color: #fe424d;
+      color: #fff;
+  }
+  .map-popup-card {
+      width: 210px;
+      font-family: "Plus Jakarta Sans", sans-serif;
+  }
+  .map-popup-card img {
+      width: 100%;
+      height: 92px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 0.55rem;
+  }
+  .map-popup-title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.25;
+      margin-bottom: 0.25rem;
+  }
+  .map-popup-meta {
+      color: #64748b;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 0.45rem;
+  }
+  .map-popup-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: #fe424d;
+      color: #fff !important;
+      padding: 0.36rem 0.62rem;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 0.78rem;
+  }
+  
+  /* --- USER PULSE EFFECT --- */
+  .user-marker {
+      width: 20px; height: 20px;
+      background-color: #4285F4;
+      border: 3px solid white; border-radius: 50%;
+      box-shadow: 0 0 0 4px rgba(66, 133, 244, 0.3);
+      animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.4); }
+      70% { box-shadow: 0 0 0 15px rgba(66, 133, 244, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(66, 133, 244, 0); }
+  }
+
+  /* --- STAR RATING --- */
+  .starability-result { transform: scale(0.9); transform-origin: left; }
+  .star-display .star { font-size: 1.2rem; color: #ddd; }
+  .star-display .star.filled { color: #f5c518; }
+
+  /* --- AUTHENTICITY SECTION --- */
+  .auth-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 14px;
+      border: 1px solid var(--listing-line);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  }
+
+  .auth-title {
+      font-weight: 800;
+      color: var(--listing-ink);
+      letter-spacing: 0.2px;
+  }
+
+  .auth-subtext {
+      color: var(--listing-muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
+  }
+
+  .auth-status-badge {
+      border-radius: 999px !important;
+      font-size: 0.78rem !important;
+      padding: 0.42rem 0.72rem !important;
+      font-weight: 700;
+      text-transform: capitalize;
+      letter-spacing: 0.2px;
+      box-shadow: 0 6px 14px rgba(2, 6, 23, 0.12);
+  }
+
+  .auth-btn-solid {
+      border: none !important;
+      color: #fff !important;
+      background: linear-gradient(120deg, #16a34a 0%, #15803d 100%) !important;
+      border-radius: 9px !important;
+      font-weight: 700 !important;
+      box-shadow: 0 8px 18px rgba(21, 128, 61, 0.25);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .auth-btn-solid:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 20px rgba(21, 128, 61, 0.28);
+  }
+
+  .auth-btn-outline {
+      border-radius: 9px !important;
+      border: 1px solid rgba(15, 23, 42, 0.2) !important;
+      background: #fff !important;
+      color: #0f172a !important;
+      font-weight: 700 !important;
+      transition: all 0.2s ease;
+  }
+
+  .auth-btn-outline:hover {
+      border-color: rgba(254, 66, 77, 0.55) !important;
+      color: #9f1239 !important;
+      background: var(--listing-soft) !important;
+  }
+
+  .auth-meta-text,
+  .auth-note-text {
+      color: #556478 !important;
+      font-size: 0.88rem;
+      font-weight: 600;
+  }
+
+  /* --- REVIEW SECTION --- */
+  .review-shell {
+      margin-top: 0.25rem;
+  }
+
+  .review-summary-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+  }
+
+  .reviews-title,
+  .review-section-title {
+      color: var(--listing-ink);
+      font-weight: 800;
+      letter-spacing: 0.1px;
+      margin-bottom: 0;
+  }
+
+  .review-summary-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      border-radius: 999px;
+      border: 1px solid rgba(254, 66, 77, 0.18);
+      background: #fff7f8;
+      color: #9f1239;
+      font-size: 0.86rem;
+      font-weight: 800;
+      padding: 0.45rem 0.78rem;
+      white-space: nowrap;
+  }
+
+  .review-form-card,
+  .review-item-card {
+      border: 1px solid rgba(219, 228, 239, 0.9) !important;
+      border-radius: 12px !important;
+      background: #ffffff;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+      overflow: hidden;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  }
+
+  .review-form-card:hover,
+  .review-item-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(254, 66, 77, 0.22) !important;
+      box-shadow: 0 16px 34px rgba(15, 23, 42, 0.11);
+  }
+
+  .review-form-card .card-body,
+  .review-item-card .card-body {
+      padding: 1.1rem;
+  }
+
+  .review-form-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-bottom: 0.85rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid rgba(219, 228, 239, 0.85);
+  }
+
+  .review-form-subtitle {
+      color: var(--listing-muted);
+      font-size: 0.9rem;
+      margin: 0.2rem 0 0;
+  }
+
+  .review-state-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      border-radius: 999px;
+      background: #f8fafc;
+      border: 1px solid rgba(100, 116, 139, 0.18);
+      color: #475569;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 0.4rem 0.65rem;
+      white-space: nowrap;
+  }
+
+  .review-form-grid {
+      display: grid;
+      grid-template-columns: minmax(170px, 220px) 1fr;
+      gap: 1rem;
+      align-items: stretch;
+  }
+
+  .review-rating-panel {
+      border-radius: 10px;
+      border: 1px solid rgba(219, 228, 239, 0.95);
+      background: #f8fafc;
+      padding: 0.95rem;
+  }
+
+  .review-form-card .form-label {
+      color: #1e293b;
+      font-weight: 800;
+      font-size: 0.9rem;
+      margin-bottom: 0.55rem;
+  }
+
+  .review-comment-input {
+      border-radius: 10px !important;
+      border: 1px solid #cfd9e6 !important;
+      background: #f8fafc !important;
+      min-height: 132px;
+      padding: 0.85rem 0.95rem !important;
+      color: #0f172a !important;
+      resize: vertical;
+  }
+
+  .review-comment-input:focus {
+      border-color: rgba(254, 66, 77, 0.48) !important;
+      box-shadow: 0 0 0 0.22rem rgba(254, 66, 77, 0.13) !important;
+      background: #fff !important;
+  }
+
+  .review-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.7rem;
+      margin-top: 1rem;
+  }
+
+  .review-submit-btn,
+  .review-edit-btn {
+      border: none !important;
+      border-radius: 9px !important;
+      background: var(--listing-brand) !important;
+      color: #fff !important;
+      font-weight: 800 !important;
+      padding: 0.58rem 1rem !important;
+      box-shadow: 0 10px 20px rgba(254, 66, 77, 0.22);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      text-decoration: none !important;
+  }
+
+  .review-submit-btn:hover,
+  .review-edit-btn:hover {
+      background: var(--listing-brand-deep) !important;
+      transform: translateY(-2px);
+      box-shadow: 0 14px 24px rgba(254, 66, 77, 0.28);
+  }
+
+  .review-live-text {
+      color: #9f1239 !important;
+      font-weight: 800;
+      font-size: 0.82rem;
+  }
+
+  .review-list-stack {
+      display: grid;
+      gap: 0.75rem;
+  }
+
+  .review-item-card {
+      margin-bottom: 0 !important;
+  }
+
+  .review-item-card .card-body {
+      padding: 0.85rem 0.95rem;
+  }
+
+  .review-item-card .row {
+      --bs-gutter-x: 0.8rem;
+      align-items: flex-start;
+  }
+
+  .review-item-header {
+      gap: 0.75rem;
+  }
+
+  .review-avatar {
+      width: 46px;
+      height: 46px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 6px 12px rgba(15, 23, 42, 0.14);
+  }
+
+  .review-author {
+      color: #0f172a;
+      font-weight: 800;
+      line-height: 1.2;
+  }
+
+  .review-meta {
+      color: #64748b !important;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-top: 0.12rem;
+  }
+
+  .review-stars {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.08rem;
+      border-radius: 999px;
+      background: #fffbeb;
+      border: 1px solid rgba(245, 158, 11, 0.18);
+      padding: 0.28rem 0.45rem;
+      line-height: 1;
+      white-space: nowrap;
+  }
+
+  .star-display .star {
+      font-size: 0.86rem;
+      color: #cbd5e1;
+      margin-left: 0;
+  }
+
+  .star-display span.star {
+      font-size: 0;
+  }
+
+  .star-display span.star::before {
+      content: "\f005";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 400;
+      font-size: 0.86rem;
+  }
+
+  .star-display span.star.filled::before {
+      font-weight: 900;
+  }
+
+  .star-display .star.filled {
+      color: #f59e0b;
+  }
+
+  .review-divider {
+      margin: 0.62rem 0 0.55rem !important;
+      opacity: 0.12;
+  }
+
+  .review-comment {
+      color: #1f2937;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      margin-bottom: 0.65rem;
+      overflow-wrap: anywhere;
+  }
+
+  .review-item-card .review-edit-btn,
+  .review-item-card .review-delete-btn {
+      padding: 0.42rem 0.7rem !important;
+      font-size: 0.78rem !important;
+  }
+
+  .review-delete-btn {
+      border-radius: 9px !important;
+      font-weight: 800 !important;
+      border: 1px solid rgba(244, 63, 94, 0.38) !important;
+      color: #e11d48 !important;
+      background: #fff !important;
+      padding: 0.52rem 0.85rem !important;
+  }
+
+  .review-delete-btn:hover {
+      color: #fff !important;
+      background: #e11d48 !important;
+      border-color: #e11d48 !important;
+  }
+
+  .review-empty-state {
+      border: 1px dashed rgba(100, 116, 139, 0.32);
+      border-radius: 12px;
+      background: #f8fafc;
+      color: #64748b;
+      padding: 1rem;
+      font-weight: 700;
+  }
+
+  @media (max-width: 767px) {
+      .review-summary-bar,
+      .review-form-head,
+      .review-item-header {
+          align-items: flex-start !important;
+          flex-direction: column;
+      }
+
+      .review-form-grid {
+          grid-template-columns: 1fr;
+      }
+
+      .review-summary-pill {
+          white-space: normal;
+      }
+
+      .review-avatar {
+          width: 42px;
+          height: 42px;
+      }
+
+      .review-item-card .card-body {
+          padding: 0.8rem;
+      }
+  }
+
+  body.dark .auth-box,
+  body.midnight .auth-box,
+  body.neon .auth-box,
+  body.dark .review-form-card,
+  body.midnight .review-form-card,
+  body.neon .review-form-card,
+  body.dark .review-item-card,
+  body.midnight .review-item-card,
+  body.neon .review-item-card {
+      background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+      border-color: rgba(148, 163, 184, 0.3) !important;
+      box-shadow: 0 16px 30px rgba(2, 6, 23, 0.55);
+  }
+
+  body.dark .review-rating-panel,
+  body.midnight .review-rating-panel,
+  body.neon .review-rating-panel,
+  body.dark .review-empty-state,
+  body.midnight .review-empty-state,
+  body.neon .review-empty-state,
+  body.dark .review-state-badge,
+  body.midnight .review-state-badge,
+  body.neon .review-state-badge {
+      background: rgba(15, 23, 42, 0.55);
+      border-color: rgba(148, 163, 184, 0.28);
+      color: #cbd5e1;
+  }
+
+  body.dark .review-form-head,
+  body.midnight .review-form-head,
+  body.neon .review-form-head {
+      border-color: rgba(148, 163, 184, 0.25);
+  }
+
+  body.dark .review-summary-pill,
+  body.midnight .review-summary-pill,
+  body.neon .review-summary-pill {
+      background: rgba(254, 66, 77, 0.12);
+      border-color: rgba(251, 113, 133, 0.3);
+      color: #ffe4ea;
+  }
+
+  body.dark .review-stars,
+  body.midnight .review-stars,
+  body.neon .review-stars {
+      background: rgba(245, 158, 11, 0.12);
+      border-color: rgba(245, 158, 11, 0.28);
+  }
+
+  body.dark .auth-title,
+  body.midnight .auth-title,
+  body.neon .auth-title,
+  body.dark .review-section-title,
+  body.midnight .review-section-title,
+  body.neon .review-section-title,
+  body.dark .reviews-title,
+  body.midnight .reviews-title,
+  body.neon .reviews-title,
+  body.dark .review-author,
+  body.midnight .review-author,
+  body.neon .review-author,
+  body.dark .review-comment,
+  body.midnight .review-comment,
+  body.neon .review-comment {
+      color: #f8fafc !important;
+  }
+
+  body.dark .auth-subtext,
+  body.midnight .auth-subtext,
+  body.neon .auth-subtext,
+  body.dark .review-form-subtitle,
+  body.midnight .review-form-subtitle,
+  body.neon .review-form-subtitle,
+  body.dark .auth-meta-text,
+  body.midnight .auth-meta-text,
+  body.neon .auth-meta-text,
+  body.dark .auth-note-text,
+  body.midnight .auth-note-text,
+  body.neon .auth-note-text,
+  body.dark .review-meta,
+  body.midnight .review-meta,
+  body.neon .review-meta {
+      color: #cbd5e1 !important;
+  }
+
+  body.dark .review-comment-input,
+  body.midnight .review-comment-input,
+  body.neon .review-comment-input {
+      background: rgba(15, 23, 42, 0.6) !important;
+      border-color: rgba(148, 163, 184, 0.35) !important;
+      color: #f8fafc !important;
+  }
+
+  body.dark .auth-btn-outline,
+  body.midnight .auth-btn-outline,
+  body.neon .auth-btn-outline {
+      background: rgba(15, 23, 42, 0.45) !important;
+      border-color: rgba(148, 163, 184, 0.45) !important;
+      color: #f8fafc !important;
+  }
+</style>
+
+<div class="container mt-4">
+
+  <h2 class="mb-3 text-center"><%= listing.title %></h2>
+
+  <%
+    const imgs = listing.images?.length > 0
+      ? listing.images
+      : listing.image ? [listing.image] : [{ url: "/images/default.jpg" }];
+  %>
+
+  <div id="listingCarousel" class="carousel slide col-8 offset-2 mb-4" data-bs-ride="carousel">
+    <div class="carousel-inner">
+      <% imgs.forEach((img, idx) => { %>
+        <div class="carousel-item <%= idx === 0 ? "active" : "" %>">
+          <img src="<%= img.url %>" class="d-block w-100 rounded"
+            style="height:380px; width: 200px; object-fit:cover;">
+        </div>
+      <% }) %>
+    </div>
+
+    <% if (imgs.length > 1) { %>
+      <button class="carousel-control-prev" type="button" data-bs-target="#listingCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#listingCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+      </button>
+    <% } %>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-8 offset-md-2">
+      <div class="card shadow-sm rounded">
+        <div class="card-body">
+
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h5 class="mb-1"><%= listing.title %></h5>
+              <small class="text-muted">
+                Owned by <strong><%= listing.owner.username %></strong>
+              </small>
+            </div>
+
+            <div class="text-end">
+              <div class="h5 mb-0">₹ <%= listing.price.toLocaleString("en-IN") %> / night</div>
+
+              <div class="mt-2">
+                <% if (currUser && listing.owner._id.equals(currUser._id)) { %>
+                  <a href="/listings/<%= listing._id %>/edit" class="btn btn-sm btn-dark">Edit</a>
+                  <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" class="d-inline">
+                    <button class="btn btn-sm btn-danger">Delete</button>
+                  </form>
+
+                <% } else if (currUser) { %>
+                  <% if (typeof activeBooking !== 'undefined' && activeBooking) { %>
+                     <button class="btn btn-sm btn-secondary" disabled style="opacity:0.8; cursor:not-allowed;">
+                        Booked
+                     </button>
+                     <% if (lastBooking) { %>
+                       <div style="font-size:11px; color:#dc3545; margin-top:5px; white-space:nowrap;">
+                         Available after: <strong><%= new Date(lastBooking.checkOut).toLocaleDateString('en-IN') %></strong>
+                       </div>
+                     <% } %>
+
+                  <% } else { %>
+                     <a href="/bookings/confirm/<%= listing._id %>" class="btn btn-sm btn-success">
+                       Book Now
+                     </a>
+                  <% } %>
+
+                <% } %>
+              </div>
+
+            </div>
+          </div>
+
+          <hr>
+
+          <p class="mb-2"><%= listing.description %></p>
+          <p class="text-muted mb-0">
+            <i class="fa-solid fa-location-dot"></i>
+            <%= listing.location %>, <%= listing.country %>
+          </p>
+
+          <div class="auth-box">
+            <div class="auth-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+              <div>
+                <strong class="auth-title">Property authenticity</strong>
+                <div class="auth-subtext">
+                  <% if (listing.verificationStatus === "verified") { %>
+                    Admin verified this property using owner legal documents.
+                  <% } else if (listing.verificationStatus === "pending") { %>
+                    Owner legal documents are uploaded and waiting for admin review.
+                  <% } else if (listing.verificationStatus === "rejected") { %>
+                    Documents were reviewed and need correction from the owner.
+                  <% } else { %>
+                    No legal verification documents have been uploaded yet.
+                  <% } %>
+                </div>
+              </div>
+
+              <span class="badge auth-status-badge <%= listing.verificationStatus === 'verified' ? 'bg-success' : listing.verificationStatus === 'pending' ? 'bg-warning text-dark' : listing.verificationStatus === 'rejected' ? 'bg-danger' : 'bg-secondary' %>">
+                <%= listing.verificationStatus.replace("_", " ") %>
+              </span>
+            </div>
+
+            <% if (listing.legalDocuments && listing.legalDocuments.length > 0) { %>
+              <div class="mt-3">
+                <% listing.legalDocuments.forEach((doc, index) => { %>
+                  <a href="<%= doc.url %>" target="_blank" rel="noopener noreferrer" class="btn btn-sm auth-btn-outline me-2 mb-2">
+                    View Legal Document <%= index + 1 %>
+                  </a>
+                <% }) %>
+              </div>
+            <% } %>
+
+            <% if (listing.verificationStatus === "verified" && listing.verificationCertificate && listing.verificationCertificate.url) { %>
+              <div class="mt-2">
+                <a href="<%= listing.verificationCertificate.url %>" target="_blank" rel="noopener noreferrer" class="btn btn-sm auth-btn-solid me-2 mb-2">
+                  Download Verified Certificate
+                </a>
+                <a href="/listings/<%= listing._id %>/verification-details" class="btn btn-sm auth-btn-outline mb-2">
+                  View Verification Form
+                </a>
+              </div>
+              <div class="auth-meta-text mt-1">
+                Verified by <%= listing.verifiedBy?.username || "Admin" %>
+                <% if (listing.verifiedAt) { %>
+                  on <%= new Date(listing.verifiedAt).toLocaleString("en-IN") %>
+                <% } %>
+              </div>
+            <% } %>
+
+            <% if (listing.verificationNote) { %>
+              <div class="auth-note-text mt-2">Admin note: <%= listing.verificationNote %></div>
+            <% } %>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%
+    const reviewCount = listing.reviews?.length || 0;
+    const averageRating = reviewCount
+      ? listing.reviews.reduce((sum, item) => sum + (Number(item.rating) || 0), 0) / reviewCount
+      : 0;
+  %>
+
+  <div class="row">
+    <div class="col-md-8 offset-md-2 review-shell">
+
+      <% if (currUser) { %>
+        <div class="card mb-3 shadow-sm review-form-card">
+          <div class="card-body">
+
+            <div class="review-form-head">
+              <div>
+                <h5 class="review-section-title"><%= currentUserReview ? "Update your review" : "Leave a review" %></h5>
+                <p class="review-form-subtitle">
+                  <%= currentUserReview ? "Keep your feedback useful and up to date." : "Share your experience to help other guests decide with confidence." %>
+                </p>
+              </div>
+              <span class="review-state-badge">
+                <i class="fa-solid <%= currentUserReview ? 'fa-pen-to-square' : 'fa-message' %>"></i>
+                <%= currentUserReview ? "Editing" : "New review" %>
+              </span>
+            </div>
+
+            <form action="/listings/<%= listing._id %>/reviews<%= currentUserReview ? `/${currentUserReview._id}?_method=PUT` : '' %>" method="POST">
+
+              <div class="review-form-grid">
+                <div class="review-rating-panel">
+                  <label class="form-label"><b>Rating</b></label>
+
+                  <fieldset class="starability-slot" id="ratingStars">
+                    <input type="radio" id="rate1" name="review[rating]" value="1" <%= currentUserReview && currentUserReview.rating === 1 ? "checked" : "" %>>
+                    <label for="rate1">1 star</label>
+
+                    <input type="radio" id="rate2" name="review[rating]" value="2" <%= currentUserReview && currentUserReview.rating === 2 ? "checked" : "" %>>
+                    <label for="rate2">2 stars</label>
+
+                    <input type="radio" id="rate3" name="review[rating]" value="3" <%= !currentUserReview || currentUserReview.rating === 3 ? "checked" : "" %>>
+                    <label for="rate3">3 stars</label>
+
+                    <input type="radio" id="rate4" name="review[rating]" value="4" <%= currentUserReview && currentUserReview.rating === 4 ? "checked" : "" %>>
+                    <label for="rate4">4 stars</label>
+
+                    <input type="radio" id="rate5" name="review[rating]" value="5" <%= currentUserReview && currentUserReview.rating === 5 ? "checked" : "" %>>
+                    <label for="rate5">5 stars</label>
+                  </fieldset>
+
+                  <div id="liveText" class="mt-1 small review-live-text">Your rating: <%= currentUserReview?.rating || 3 %>/5</div>
+                </div>
+
+                <div>
+                  <label class="form-label">Review details</label>
+                  <textarea name="review[comment]" class="form-control review-comment-input" rows="3" required placeholder="What stood out about the stay, location, cleanliness, or host?"><%= currentUserReview?.comment || "" %></textarea>
+                </div>
+              </div>
+
+              <div class="review-actions">
+                <button class="btn review-submit-btn">
+                  <i class="fa-solid <%= currentUserReview ? 'fa-check' : 'fa-paper-plane' %> me-1"></i>
+                  <%= currentUserReview ? "Update Review" : "Submit Review" %>
+                </button>
+              </div>
+
+            </form>
+
+          </div>
+        </div>
+      <% } else { %>
+        <div class="alert alert-light mb-3">Please <a href="/login">log in</a> to leave a review.</div>
+      <% } %>
+    </div>
+    
+    <div class="col-md-8 offset-md-2">
+      <div class="review-summary-bar">
+        <h5 class="reviews-title">Guest Reviews</h5>
+        <span class="review-summary-pill">
+          <i class="fa-solid fa-star"></i>
+          <% if (reviewCount > 0) { %>
+            <%= averageRating.toFixed(1) %> average - <%= reviewCount %> <%= reviewCount === 1 ? "review" : "reviews" %>
+          <% } else { %>
+            No reviews yet
+          <% } %>
+        </span>
+      </div>
+
+      <% if (listing.reviews?.length > 0) { %>
+
+        <div class="review-list-stack">
+        <% listing.reviews.forEach(review => { %>
+          <div class="card mb-3 shadow-sm review-item-card">
+            <div class="card-body">
+
+              <div class="row">
+
+                <div class="col-auto pe-0">
+                  <img src="<%= review.author.profileImage?.url || '/images/default-avatar.png' %>"
+                    class="review-avatar">
+                </div>
+
+                <div class="col">
+
+                  <div class="d-flex justify-content-between align-items-start review-item-header">
+
+                    <div>
+                      <strong class="review-author"><%= review.author.username %></strong>
+                      <div class="review-meta small">
+                        <%= new Date(review.createdAt).toLocaleDateString("en-IN",
+                          { year: "numeric", month: "short", day: "numeric" }) %>
+                        •
+                        <%= new Date(review.createdAt).toLocaleTimeString("en-IN",
+                          { hour: "2-digit", minute: "2-digit" }) %>
+                        <% if (review.updatedAt && new Date(review.updatedAt).getTime() > new Date(review.createdAt).getTime() + 1000) { %>
+                          <span> - edited</span>
+                        <% } %>
+                      </div>
+                    </div>
+
+                   <div class="star-display review-stars">
+                    <% for (let i = 1; i <= review.rating; i++) { %>
+                     <span class="star filled">★</span>
+                    <% } %>
+
+                    <% for (let i = review.rating + 1; i <= 5; i++) { %>
+                      <span class="star">☆</span>
+                     <% } %>
+                   </div>
+
+
+                  </div>
+
+                  <hr class="review-divider">
+                  <p class="review-comment"><%= review.comment %></p>
+
+                  <% if (currUser && review.author._id.equals(currUser._id)) { %>
+                    <a href="#ratingStars" class="btn btn-sm review-edit-btn me-2">
+                      <i class="fa-solid fa-pen me-1"></i>Edit
+                    </a>
+                    <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" class="d-inline">
+                      <button class="btn btn-sm review-delete-btn">
+                        <i class="fa-solid fa-trash-can me-1"></i>Delete
+                      </button>
+                    </form>
+                  <% } %>
+
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        <% }) %>
+        </div>
+
+      <% } else { %>
+        <div class="review-empty-state">No reviews yet. Be the first to share your stay experience.</div>
+      <% } %>
+
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-md-8 offset-md-2 mb-5">
+      <div class="d-flex align-items-center mb-2">
+         <h5>Where you'll be</h5>
+         <span id="route-info" style="font-size:14px; color:#e51d53; font-weight:700; margin-left:15px;">
+           <i class="fa-solid fa-spinner fa-spin"></i> Calculating distance...
+         </span>
+      </div>
+      <div class="map-tools">
+        <div class="map-tool-group" aria-label="Travel mode">
+          <button type="button" class="map-tool-btn active" data-profile="mapbox/driving-traffic" data-mode="car">
+            <i class="fa-solid fa-car me-1"></i>Car
+          </button>
+          <button type="button" class="map-tool-btn" data-profile="mapbox/walking" data-mode="walking">
+            <i class="fa-solid fa-person-walking me-1"></i>Walk
+          </button>
+          <button type="button" class="map-tool-btn" data-profile="mapbox/cycling" data-mode="bike">
+            <i class="fa-solid fa-bicycle me-1"></i>Bike
+          </button>
+        </div>
+        <div class="map-tool-group" aria-label="Map actions">
+          <button type="button" class="map-tool-btn" id="useCurrentLocationBtn">
+            <i class="fa-solid fa-location-crosshairs me-1"></i>Use current location
+          </button>
+          <button type="button" class="map-tool-btn" id="radiusToggleBtn">
+            <i class="fa-solid fa-circle-dot me-1"></i>Radius
+          </button>
+        </div>
+        <div class="map-tool-group" aria-label="Nearby places">
+          <button type="button" class="map-tool-btn" data-poi="restaurant">
+            <i class="fa-solid fa-utensils me-1"></i>Food
+          </button>
+          <button type="button" class="map-tool-btn" data-poi="hospital">
+            <i class="fa-solid fa-hospital me-1"></i>Hospital
+          </button>
+          <button type="button" class="map-tool-btn" data-poi="atm">
+            <i class="fa-solid fa-money-bill-wave me-1"></i>ATM
+          </button>
+          <button type="button" class="map-tool-btn" data-poi="travel">
+            <i class="fa-solid fa-map-location-dot me-1"></i>Travel
+          </button>
+        </div>
+      </div>
+      <div id="map" style="height:320px; border-radius:8px; overflow:hidden;"></div>
+    </div>
+  </div>
+
+</div>
+<script>
+  document.querySelectorAll('input[name="review[rating]"]').forEach(input => {
+    input.addEventListener("change", () => {
+      const liveText = document.getElementById("liveText");
+      if (liveText) liveText.textContent = `Your rating: ${input.value}/5`;
+    });
+  });
+
+  /********************************************************
+   * MAP + LOCATION (AIRBNB STYLE)
+   * STRUCTURE & LOGIC UNCHANGED
+   ********************************************************/
+
+  if (!listing || !listing.geometry || !listing.geometry.coordinates) {
+    console.warn("Listing geometry missing");
+  }
+
+  mapboxgl.accessToken = mapToken;
+  const listingCoords = listing.geometry.coordinates;
+
+  /* ===== MAP INIT ===== */
+  const map = new mapboxgl.Map({
+    container: "map",
+    style: "mapbox://styles/mapbox/streets-v12",
+    center: listingCoords,
+    zoom: 11
+  });
+
+  map.addControl(new mapboxgl.NavigationControl(), "bottom-right");
+  map.on("load", () => {
+    addRadiusLayers();
+    toggleRadiusLayers(false);
+  });
+
+  let currentProfile = "mapbox/driving-traffic";
+  let directions = null;
+
+  function initDirectionsControl(profile = "mapbox/driving-traffic") {
+    if (typeof MapboxDirections !== "function") {
+      console.warn("MapboxDirections plugin unavailable. Using API fallback for timing updates.");
+      return null;
+    }
+
+    try {
+      const control = new MapboxDirections({
+        accessToken: mapboxgl.accessToken,
+        unit: "metric",
+        profile,
+        controls: { inputs: false, instructions: false },
+        interactive: false
+      });
+      map.addControl(control, "top-left");
+      return control;
+    } catch (error) {
+      console.warn("Failed to initialize directions control:", error.message || error);
+      return null;
+    }
+  }
+
+  directions = initDirectionsControl(currentProfile);
+
+  let confirmedUserLocation = null;
+  let confirmedLocationSource = "";
+  let currentTravelMode = "car";
+  let currentRoute = { distanceKm: "", durationMin: "" };
+  let lastRouteRequestId = 0;
+  let userMarker = null;
+  const nearbyMarkers = [];
+  const poiMarkers = [];
+  const bookNowLink = document.querySelector(`a[href="/bookings/confirm/${listing._id}"]`);
+
+  function updateBookingLink() {
+    if (!bookNowLink || !Array.isArray(confirmedUserLocation)) return;
+    const url = new URL(bookNowLink.href, window.location.origin);
+    url.searchParams.set("lng", confirmedUserLocation[0].toFixed(6));
+    url.searchParams.set("lat", confirmedUserLocation[1].toFixed(6));
+    url.searchParams.set("locationSource", confirmedLocationSource || "map");
+    url.searchParams.set("travelMode", currentTravelMode);
+    if (currentRoute.distanceKm) url.searchParams.set("distanceKm", currentRoute.distanceKm);
+    if (currentRoute.durationMin) url.searchParams.set("durationMin", currentRoute.durationMin);
+    bookNowLink.href = url.pathname + url.search;
+  }
+
+  function renderRouteInfo(distanceKm, durationMin) {
+    currentRoute = { distanceKm: String(distanceKm), durationMin: String(durationMin) };
+    updateBookingLink();
+
+    const info = document.getElementById("route-info");
+    if (info) {
+      info.innerHTML = `<i class="fa-solid fa-route"></i> ${distanceKm} km &bull; ${durationMin} min`;
+    }
+  }
+
+  function syncRouteFromDirectionsPayload(route) {
+    if (!route || typeof route.distance !== "number" || typeof route.duration !== "number") return;
+    const km = (route.distance / 1000).toFixed(2);
+    const min = Math.max(1, Math.round(route.duration / 60));
+    renderRouteInfo(km, min);
+  }
+
+  async function updateRouteTimingFromApi(originCoords, profile = currentProfile) {
+    if (!Array.isArray(originCoords) || originCoords.length !== 2) return;
+    const requestId = ++lastRouteRequestId;
+    const coordinatesPath = `${originCoords[0]},${originCoords[1]};${listingCoords[0]},${listingCoords[1]}`;
+    const endpoint = `https://api.mapbox.com/directions/v5/${profile}/${coordinatesPath}`;
+    const params = new URLSearchParams({
+      alternatives: "false",
+      overview: "false",
+      steps: "false",
+      geometries: "geojson",
+      access_token: mapboxgl.accessToken
+    });
+
+    try {
+      const response = await fetch(`${endpoint}?${params.toString()}`);
+      if (!response.ok) throw new Error("Route timing lookup failed");
+      const data = await response.json();
+      if (requestId !== lastRouteRequestId) return;
+      const firstRoute = data.routes && data.routes[0];
+      syncRouteFromDirectionsPayload(firstRoute);
+    } catch (error) {
+      if (requestId !== lastRouteRequestId) return;
+      console.warn("Route timing fallback error:", error.message || error);
+    }
+  }
+
+  function setRouteOrigin(coords, source = "map", options = {}) {
+    if (!Array.isArray(coords)) return;
+    confirmedUserLocation = coords;
+    confirmedLocationSource = source;
+    const profileForRoute = options.profile || currentProfile;
+    if (directions && typeof directions.setOrigin === "function" && typeof directions.setDestination === "function") {
+      try {
+        directions.setOrigin(coords);
+        directions.setDestination(listingCoords);
+      } catch (error) {
+        console.warn("Directions control route update failed:", error.message || error);
+        updateRouteTimingFromApi(coords, profileForRoute);
+      }
+    } else {
+      updateRouteTimingFromApi(coords, profileForRoute);
+    }
+    if (userMarker) userMarker.setLngLat(coords);
+    updateBookingLink();
+  }
+
+  function createCircle(center, radiusInKm, points = 80) {
+    const coords = {
+      latitude: center[1],
+      longitude: center[0]
+    };
+    const km = radiusInKm;
+    const ret = [];
+    const distanceX = km / (111.32 * Math.cos(coords.latitude * Math.PI / 180));
+    const distanceY = km / 110.574;
+
+    for (let i = 0; i < points; i++) {
+      const theta = (i / points) * (2 * Math.PI);
+      const x = distanceX * Math.cos(theta);
+      const y = distanceY * Math.sin(theta);
+      ret.push([coords.longitude + x, coords.latitude + y]);
+    }
+    ret.push(ret[0]);
+    return {
+      type: "Feature",
+      geometry: { type: "Polygon", coordinates: [ret] }
+    };
+  }
+
+  function addRadiusLayers() {
+    if (!map.getSource("radius-1km")) {
+      map.addSource("radius-1km", { type: "geojson", data: createCircle(listingCoords, 1) });
+      map.addLayer({
+        id: "radius-1km",
+        type: "fill",
+        source: "radius-1km",
+        paint: { "fill-color": "#fe424d", "fill-opacity": 0.2 }
+      });
+      map.addLayer({
+        id: "radius-1km-line",
+        type: "line",
+        source: "radius-1km",
+        paint: { "line-color": "#fe424d", "line-width": 3, "line-opacity": 0.9 }
+      });
+    }
+
+    if (!map.getSource("radius-5km")) {
+      map.addSource("radius-5km", { type: "geojson", data: createCircle(listingCoords, 5) });
+      map.addLayer({
+        id: "radius-5km",
+        type: "fill",
+        source: "radius-5km",
+        paint: { "fill-color": "#0f172a", "fill-opacity": 0.12 }
+      });
+      map.addLayer({
+        id: "radius-5km-line",
+        type: "line",
+        source: "radius-5km",
+        paint: { "line-color": "#0f172a", "line-width": 2, "line-opacity": 0.55 }
+      });
+    }
+  }
+
+  function toggleRadiusLayers(show) {
+    if (!map.loaded()) {
+      map.once("load", () => {
+        addRadiusLayers();
+        toggleRadiusLayers(show);
+      });
+      return;
+    }
+    addRadiusLayers();
+    ["radius-1km", "radius-1km-line", "radius-5km", "radius-5km-line"].forEach(id => {
+      if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", show ? "visible" : "none");
+    });
+  }
+
+  /* ===== LISTING MARKER ===== */
+  (() => {
+    const homeEl = document.createElement("div");
+    homeEl.className = "marker-home";
+    homeEl.innerHTML = '<i class="fa-solid fa-house"></i>';
+
+    new mapboxgl.Marker(homeEl)
+      .setLngLat(listingCoords)
+      .setPopup(
+        new mapboxgl.Popup({ offset: 25 }).setHTML(`<b>${listing.title}</b>`)
+      )
+      .addTo(map);
+  })();
+
+  /* ===== NEARBY LISTINGS (FROM BACKEND: 10–50 KM) ===== */
+  if (Array.isArray(nearbyListings) && nearbyListings.length > 0) {
+    nearbyListings.forEach(stay => {
+      try {
+      if (!stay.geometry || !stay.geometry.coordinates || !stay.price) return;
+
+      const pin = document.createElement("div");
+      pin.className = "marker-nearby";
+      pin.innerText = `Rs ${stay.price.toLocaleString("en-IN")}`;
+      const stayImage = stay.images?.[0]?.url || stay.image?.url || "/images/default.jpg";
+
+      pin.addEventListener("click", () => {
+        nearbyMarkers.forEach(item => item.pin.classList.remove("is-active"));
+        pin.classList.add("is-active");
+      });
+
+      const marker = new mapboxgl.Marker(pin)
+        .setLngLat(stay.geometry.coordinates)
+        .setPopup(
+          new mapboxgl.Popup({ offset: 25 }).setHTML(
+            `<div class="map-popup-card">
+              <img src="${stayImage}" alt="">
+              <div class="map-popup-title">${stay.title}</div>
+              <div class="map-popup-meta">Rs ${stay.price.toLocaleString("en-IN")} / night</div>
+              <div class="map-popup-meta">${stay.location || ""}</div>
+              <a class="map-popup-link" href="/listings/${stay._id}">View stay</a>
+            </div>`
+          )
+        )
+        .addTo(map);
+
+      marker.getElement().addEventListener("mouseenter", () => pin.classList.add("is-active"));
+      marker.getElement().addEventListener("mouseleave", () => pin.classList.remove("is-active"));
+      nearbyMarkers.push({ marker, pin, stay });
+      } catch (error) {
+        console.warn("Nearby listing marker skipped:", error.message || error);
+      }
+    });
+  }
+
+  /* =====================================================
+     LOCATION HELPERS (GPS + IP)
+     LOGIC UNCHANGED
+  ===================================================== */
+
+  async function getIPLocation() {
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      if (!res.ok) throw new Error("IP lookup failed");
+
+      const data = await res.json();
+      return {
+        coords: [data.longitude, data.latitude],
+        accuracy: 10000,
+        source: "IP"
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  function getGPSLocation() {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) return reject();
+
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve({
+          coords: [pos.coords.longitude, pos.coords.latitude],
+          accuracy: pos.coords.accuracy,
+          source: "GPS"
+        }),
+        reject,
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    });
+  }
+
+  async function getBestUserLocation() {
+    try {
+      const gps = await getGPSLocation();
+      if (gps.accuracy <= 500) return gps;
+      return (await getIPLocation()) || gps;
+    } catch {
+      return await getIPLocation();
+    }
+  }
+
+  function clearPoiMarkers() {
+    while (poiMarkers.length) {
+      const marker = poiMarkers.pop();
+      marker.remove();
+    }
+  }
+
+  const POI_INTENT_FROM_BUTTON = {
+    restaurant: "food",
+    hospital: "hospital",
+    atm: "atm",
+    travel: "travel"
+  };
+
+  const MAPBOX_CATEGORY_HINTS = {
+    food: ["food_and_drink", "restaurant", "food", "coffee", "cafe", "lodging", "hotel"],
+    hospital: ["hospital", "health", "medical", "clinic"],
+    atm: ["atm", "bank", "finance", "financial"],
+    travel: ["travel", "tourism", "attraction", "airport", "station", "transport", "lodging"]
+  };
+
+  const OVERPASS_FILTERS_BY_INTENT = {
+    food: [
+      { key: "amenity", valueRegex: "restaurant|cafe|fast_food|food_court|bar" },
+      { key: "tourism", valueRegex: "hotel|guest_house|hostel|motel|resort" }
+    ],
+    hospital: [
+      { key: "amenity", valueRegex: "hospital|clinic|doctors|pharmacy" }
+    ],
+    atm: [
+      { key: "amenity", valueRegex: "atm|bank" }
+    ],
+    travel: [
+      { key: "tourism", valueRegex: "attraction|museum|viewpoint" },
+      { key: "aeroway", valueRegex: "aerodrome" },
+      { key: "railway", valueRegex: "station" },
+      { key: "amenity", valueRegex: "bus_station|ferry_terminal" }
+    ]
+  };
+
+  let cachedMapboxCategoryList = null;
+  const nearbyPlacesCache = new Map();
+  const NEARBY_PLACES_CACHE_TTL_MS = 1000 * 60 * 6;
+
+  function getPoiIntent(queryText) {
+    const normalized = String(queryText || "").trim().toLowerCase();
+    return POI_INTENT_FROM_BUTTON[normalized] || "food";
+  }
+
+  function getActiveSearchRadiusKm() {
+    const radiusToggleBtn = document.getElementById("radiusToggleBtn");
+    return radiusToggleBtn && radiusToggleBtn.classList.contains("active") ? 5 : 2.5;
+  }
+
+  function getNearbyCacheKey(intent) {
+    const radiusKm = getActiveSearchRadiusKm();
+    return [
+      String(intent || "food"),
+      radiusKm,
+      listingCoords[0].toFixed(4),
+      listingCoords[1].toFixed(4)
+    ].join("|");
+  }
+
+  function cloneNearbyPlace(place) {
+    return {
+      ...place,
+      coordinates: Array.isArray(place.coordinates) ? [...place.coordinates] : place.coordinates
+    };
+  }
+
+  function pruneNearbyPlacesCache() {
+    const now = Date.now();
+    for (const [key, value] of nearbyPlacesCache.entries()) {
+      if (!value || now - value.createdAt > NEARBY_PLACES_CACHE_TTL_MS) {
+        nearbyPlacesCache.delete(key);
+      }
+    }
+  }
+
+  function readNearbyPlacesCache(intent) {
+    pruneNearbyPlacesCache();
+    const key = getNearbyCacheKey(intent);
+    const hit = nearbyPlacesCache.get(key);
+    if (!hit || !Array.isArray(hit.places)) return null;
+    return hit.places.map(cloneNearbyPlace);
+  }
+
+  function writeNearbyPlacesCache(intent, places) {
+    const key = getNearbyCacheKey(intent);
+    nearbyPlacesCache.set(key, {
+      createdAt: Date.now(),
+      places: (places || []).map(cloneNearbyPlace)
+    });
+  }
+
+  function buildRadiusBBox(centerCoords, radiusKm) {
+    const lat = centerCoords[1];
+    const lng = centerCoords[0];
+    const latDelta = radiusKm / 110.574;
+    const lngDelta = radiusKm / (111.32 * Math.cos((lat * Math.PI) / 180));
+    return [lng - lngDelta, lat - latDelta, lng + lngDelta, lat + latDelta];
+  }
+
+  function createBoundsFromRadius(centerCoords, radiusKm) {
+    const [minLng, minLat, maxLng, maxLat] = buildRadiusBBox(centerCoords, radiusKm);
+    return new mapboxgl.LngLatBounds([minLng, minLat], [maxLng, maxLat]);
+  }
+
+  function normalizePoiFeature(place) {
+    if (!place) return null;
+    const coordinates =
+      place.center ||
+      place.geometry?.coordinates ||
+      (typeof place.lon === "number" && typeof place.lat === "number" ? [place.lon, place.lat] : null);
+    if (!Array.isArray(coordinates) || coordinates.length < 2) return null;
+
+    const title =
+      place.properties?.name ||
+      place.tags?.name ||
+      place.text ||
+      place.name ||
+      "Nearby place";
+    const subtitle =
+      place.properties?.full_address ||
+      place.place_name ||
+      place.properties?.place_formatted ||
+      place.address ||
+      place.tags?.amenity ||
+      place.tags?.tourism ||
+      "";
+
+    return {
+      id: place.id || place.properties?.mapbox_id || `${coordinates[0]},${coordinates[1]}`,
+      coordinates,
+      title,
+      subtitle
+    };
+  }
+
+  async function fetchMapboxCategoryList() {
+    if (Array.isArray(cachedMapboxCategoryList)) return cachedMapboxCategoryList;
+
+    try {
+      const params = new URLSearchParams({
+        language: "en",
+        access_token: mapboxgl.accessToken
+      });
+      const response = await fetch(`https://api.mapbox.com/search/searchbox/v1/list/category?${params.toString()}`);
+      if (!response.ok) throw new Error("Category list lookup failed");
+      const data = await response.json();
+      cachedMapboxCategoryList = Array.isArray(data.listItems) ? data.listItems : [];
+    } catch (error) {
+      console.warn("Mapbox category list error:", error.message || error);
+      cachedMapboxCategoryList = [];
+    }
+
+    return cachedMapboxCategoryList;
+  }
+
+  function getCategoryIdsForIntent(intent, categoryList) {
+    const hints = MAPBOX_CATEGORY_HINTS[intent] || [];
+    const scored = [];
+
+    (categoryList || []).forEach(item => {
+      const canonicalId = String(item.canonical_id || "").toLowerCase();
+      const displayName = String(item.name || "").toLowerCase();
+      const haystack = `${canonicalId} ${displayName}`;
+      let score = 0;
+
+      hints.forEach((hint, index) => {
+        if (haystack.includes(hint)) {
+          score += Math.max(1, hints.length - index + 1);
+        }
+      });
+
+      if (score > 0) scored.push({ canonicalId, score });
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+    const unique = [];
+    scored.forEach(item => {
+      if (!unique.includes(item.canonicalId)) unique.push(item.canonicalId);
+    });
+
+    return unique.slice(0, 4);
+  }
+
+  async function fetchNearbyPlacesFromMapbox(intent) {
+    const radiusKm = getActiveSearchRadiusKm();
+    const bbox = buildRadiusBBox(listingCoords, radiusKm).join(",");
+    const categoryList = await fetchMapboxCategoryList();
+    const categoryIds = getCategoryIdsForIntent(intent, categoryList);
+    if (!categoryIds.length) return [];
+
+    const categoryRequests = categoryIds.map(categoryId => {
+      const params = new URLSearchParams({
+        access_token: mapboxgl.accessToken,
+        types: "poi",
+        language: "en",
+        limit: "8",
+        proximity: listingCoords.join(","),
+        bbox
+      });
+      const endpoint = `https://api.mapbox.com/search/searchbox/v1/category/${encodeURIComponent(categoryId)}?${params.toString()}`;
+      return fetch(endpoint)
+        .then(response => {
+          if (!response.ok) throw new Error(`Category search failed: ${categoryId}`);
+          return response.json();
+        })
+        .then(data => (Array.isArray(data.features) ? data.features : []))
+        .catch(error => {
+          console.warn("Mapbox category search error:", error.message || error);
+          return [];
+        });
+    });
+
+    const allFeatures = (await Promise.all(categoryRequests)).flat();
+    const deduped = [];
+    const seen = new Set();
+
+    allFeatures.forEach(feature => {
+      const normalized = normalizePoiFeature(feature);
+      if (!normalized) return;
+      const key = normalized.id || `${normalized.coordinates[0].toFixed(5)},${normalized.coordinates[1].toFixed(5)}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      deduped.push(normalized);
+    });
+
+    return deduped.slice(0, 12);
+  }
+
+  function buildOverpassQuery(intent, radiusMeters, lat, lng) {
+    const filters = OVERPASS_FILTERS_BY_INTENT[intent] || OVERPASS_FILTERS_BY_INTENT.food;
+    const selectors = [];
+
+    filters.forEach(filter => {
+      const escapedValue = String(filter.valueRegex).replace(/"/g, '\\"');
+      selectors.push(`node["${filter.key}"~"${escapedValue}"](around:${radiusMeters},${lat},${lng});`);
+      selectors.push(`way["${filter.key}"~"${escapedValue}"](around:${radiusMeters},${lat},${lng});`);
+      selectors.push(`relation["${filter.key}"~"${escapedValue}"](around:${radiusMeters},${lat},${lng});`);
+    });
+
+    return `[out:json][timeout:25];(${selectors.join("")});out center;`;
+  }
+
+  async function fetchNearbyPlacesFromOverpass(intent) {
+    const radiusMeters = Math.round(getActiveSearchRadiusKm() * 1000);
+    const lat = listingCoords[1];
+    const lng = listingCoords[0];
+    const query = buildOverpassQuery(intent, radiusMeters, lat, lng);
+    const body = new URLSearchParams({ data: query });
+
+    try {
+      const response = await fetch("https://overpass-api.de/api/interpreter", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+        body: body.toString()
+      });
+      if (!response.ok) throw new Error("Overpass nearby search failed");
+      const data = await response.json();
+      const elements = Array.isArray(data.elements) ? data.elements : [];
+      const normalized = elements
+        .map(element => {
+          const coordinates =
+            typeof element.lon === "number" && typeof element.lat === "number"
+              ? [element.lon, element.lat]
+              : (element.center && typeof element.center.lon === "number" && typeof element.center.lat === "number"
+                ? [element.center.lon, element.center.lat]
+                : null);
+          if (!coordinates) return null;
+
+          return normalizePoiFeature({
+            id: element.id ? `osm-${element.type || "element"}-${element.id}` : undefined,
+            lon: coordinates[0],
+            lat: coordinates[1],
+            tags: element.tags || {},
+            name: element.tags?.name || "Nearby place",
+            address: element.tags?.["addr:full"] || element.tags?.["addr:street"] || ""
+          });
+        })
+        .filter(Boolean);
+
+      return normalized.slice(0, 12);
+    } catch (error) {
+      console.warn("Overpass nearby search error:", error.message || error);
+      return [];
+    }
+  }
+
+  async function fetchNearbyPlaces(queryText) {
+    const intent = getPoiIntent(queryText);
+    const cached = readNearbyPlacesCache(intent);
+    if (cached) return cached;
+
+    const mapboxPlaces = await fetchNearbyPlacesFromMapbox(intent);
+    if (mapboxPlaces.length > 0) {
+      writeNearbyPlacesCache(intent, mapboxPlaces);
+      return mapboxPlaces;
+    }
+
+    const fallbackPlaces = await fetchNearbyPlacesFromOverpass(intent);
+    writeNearbyPlacesCache(intent, fallbackPlaces);
+    return fallbackPlaces;
+  }
+
+  async function loadNearbyPlaces(query, activeButton) {
+    clearPoiMarkers();
+    document.querySelectorAll("[data-poi]").forEach(btn => btn.classList.remove("active"));
+    if (activeButton) activeButton.classList.add("active");
+
+    try {
+      const places = await fetchNearbyPlaces(query);
+      const routeInfo = document.getElementById("route-info");
+      if (!places.length && routeInfo) {
+        routeInfo.innerHTML = "No nearby places found in this area";
+      }
+
+      const poiBounds = new mapboxgl.LngLatBounds();
+      places.forEach(place => {
+        const el = document.createElement("div");
+        el.className = "marker-poi";
+        el.innerHTML = '<i class="fa-solid fa-location-dot"></i>';
+
+        const marker = new mapboxgl.Marker(el)
+          .setLngLat(place.coordinates)
+          .setPopup(
+            new mapboxgl.Popup({ offset: 20 }).setHTML(
+              `<div class="map-popup-title">${place.title}</div>
+               <div class="map-popup-meta">${place.subtitle}</div>`
+            )
+          )
+          .addTo(map);
+
+        poiMarkers.push(marker);
+        poiBounds.extend(place.coordinates);
+      });
+
+      if (!poiBounds.isEmpty()) {
+        poiBounds.extend(listingCoords);
+        map.fitBounds(poiBounds, { padding: 60, maxZoom: 14, duration: 700 });
+      }
+    } catch (error) {
+      console.warn("Nearby places error:", error.message || error);
+    }
+  }
+
+  function applyTravelProfile(nextProfile) {
+    currentProfile = nextProfile || "mapbox/driving-traffic";
+
+    if (directions && typeof directions.setProfile === "function") {
+      try {
+        directions.setProfile(currentProfile);
+      } catch (error) {
+        console.warn("Directions profile switch failed:", error.message || error);
+      }
+      return;
+    }
+
+    if (!directions) {
+      directions = initDirectionsControl(currentProfile);
+    }
+  }
+
+  function bindMapControls() {
+    document.addEventListener("click", async event => {
+      const profileButton = event.target.closest("[data-profile]");
+      if (profileButton) {
+        document.querySelectorAll("[data-profile]").forEach(btn => btn.classList.remove("active"));
+        profileButton.classList.add("active");
+        const selectedProfile = profileButton.dataset.profile || "mapbox/driving-traffic";
+        currentTravelMode = profileButton.dataset.mode || "car";
+        applyTravelProfile(selectedProfile);
+        if (confirmedUserLocation) {
+          setRouteOrigin(confirmedUserLocation, confirmedLocationSource || "map", { profile: selectedProfile });
+          updateRouteTimingFromApi(confirmedUserLocation, selectedProfile);
+        }
+        return;
+      }
+
+      const poiButton = event.target.closest("[data-poi]");
+      if (poiButton) {
+        loadNearbyPlaces(poiButton.dataset.poi, poiButton);
+        return;
+      }
+
+      const radiusToggleBtn = event.target.closest("#radiusToggleBtn");
+      if (radiusToggleBtn) {
+        const shouldShow = !radiusToggleBtn.classList.contains("active");
+        radiusToggleBtn.classList.toggle("active", shouldShow);
+        toggleRadiusLayers(shouldShow);
+        if (shouldShow) {
+          const radiusBounds = createBoundsFromRadius(listingCoords, 5);
+          map.fitBounds(radiusBounds, { padding: 50, maxZoom: 13, duration: 650 });
+        } else if (confirmedUserLocation) {
+          const bounds = new mapboxgl.LngLatBounds();
+          bounds.extend(confirmedUserLocation);
+          bounds.extend(listingCoords);
+          map.fitBounds(bounds, { padding: 60, maxZoom: 14, duration: 650 });
+        } else {
+          map.flyTo({ center: listingCoords, zoom: 12, duration: 650 });
+        }
+        return;
+      }
+
+      const useCurrentLocationBtn = event.target.closest("#useCurrentLocationBtn");
+      if (!useCurrentLocationBtn) return;
+
+      const routeInfo = document.getElementById("route-info");
+      if (routeInfo) routeInfo.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Finding your location...';
+      try {
+        const gps = await getGPSLocation();
+        setRouteOrigin(gps.coords, "GPS");
+        map.flyTo({ center: gps.coords, zoom: 13 });
+      } catch {
+        const fallback = await getIPLocation();
+        if (fallback) {
+          setRouteOrigin(fallback.coords, "IP");
+          map.flyTo({ center: fallback.coords, zoom: 12 });
+        } else if (routeInfo) {
+          routeInfo.innerHTML = "Location unavailable";
+        }
+      }
+    });
+  }
+
+  bindMapControls();
+
+  /* ===== USER LOCATION (AIRBNB FINAL LOGIC) ===== */
+  (async () => {
+    const routeInfo = document.getElementById("route-info");
+    const userData = await getBestUserLocation();
+
+    if (!userData || !Array.isArray(userData.coords)) {
+      if (routeInfo) routeInfo.innerHTML = "Location unavailable";
+      return;
+    }
+
+    confirmedUserLocation = userData.coords;
+    confirmedLocationSource = userData.source;
+
+    const userEl = document.createElement("div");
+    userEl.className = "user-marker";
+
+    userMarker = new mapboxgl.Marker(userEl)
+      .setLngLat(confirmedUserLocation)
+      .setPopup(
+        new mapboxgl.Popup().setHTML(
+          `<b>You</b><br>${userData.source} based`
+        )
+      )
+      .addTo(map);
+
+    setRouteOrigin(confirmedUserLocation, userData.source);
+
+    const bounds = new mapboxgl.LngLatBounds();
+    bounds.extend(confirmedUserLocation);
+    bounds.extend(listingCoords);
+    map.fitBounds(bounds, { padding: 60, maxZoom: 14 });
+
+    /* ===== AIRBNB RULE: MAP CENTER IS TRUTH ===== */
+    if (routeInfo) {
+      if (userData.source === "GPS" && userData.accuracy > 800) {
+        routeInfo.innerHTML =
+          "⚠️ Approximate location detected. Drag map to adjust.";
+      } else {
+        routeInfo.innerHTML =
+          "📍 Drag map if your location looks incorrect";
+      }
+    }
+
+  })();
+
+    /* ===== DISTANCE & ETA ===== */
+  if (directions && typeof directions.on === "function") {
+    directions.on("route", e => {
+      if (!e.route || !e.route[0]) return;
+      syncRouteFromDirectionsPayload(e.route[0]);
+    });
+  }
+</script>
+

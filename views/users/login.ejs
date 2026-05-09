@@ -1,0 +1,405 @@
+<% layout("layouts/boilerplate") %>
+
+<style>
+  body {
+    margin: 0;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    background-color: #f8fafc;
+    background-image:
+      linear-gradient(#e5e7eb 1px, transparent 1px),
+      linear-gradient(90deg, #e5e7eb 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center center;
+    position: relative;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+  body::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(244, 63, 94, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+    border-radius: 50%;
+    z-index: -1;
+    animation: pulseGlow 6s ease-in-out infinite alternate;
+  }
+  @keyframes pulseGlow {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  }
+  .login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 85vh;
+    padding: 20px;
+  }
+  .login-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    width: 100%;
+    max-width: 440px;
+    padding: 40px 35px;
+    border-radius: 24px;
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.05),
+      0 10px 15px -3px rgba(0, 0, 0, 0.05),
+      0 0 0 1px rgba(255,255,255,0.8) inset;
+    text-align: center;
+    border: 1px solid #f1f5f9;
+    transition: transform 0.3s ease;
+  }
+  .login-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 30px -5px rgba(0, 0, 0, 0.08);
+  }
+  .brand-logo-container {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, #f43f5e, #e11d48);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 28px;
+    box-shadow: 0 10px 20px rgba(244, 63, 94, 0.3);
+  }
+  h2 { font-weight: 800; color: #0f172a; margin: 0 0 8px; font-size: 26px; letter-spacing: -0.5px; }
+  p.subtitle { color: #64748b; font-size: 14px; margin-bottom: 30px; font-weight: 500; }
+  .social-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 25px;
+  }
+  .social-btn {
+    height: 48px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #334155;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .social-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  }
+  .social-btn[aria-disabled="true"] {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+  .divider {
+    display: flex;
+    align-items: center;
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 700;
+    margin: 25px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .divider::before, .divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
+  }
+  .divider span { padding: 0 15px; }
+  .form-group { margin-bottom: 20px; text-align: left; }
+  .form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .custom-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 14px;
+    transition: all 0.2s;
+    outline: none;
+    background: #fff;
+    color: #1e293b;
+  }
+  .custom-input::placeholder { color: #94a3b8; }
+  .custom-input:focus {
+    border-color: #f43f5e;
+    box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.1);
+  }
+  .options-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    margin-bottom: 25px;
+    color: #64748b;
+  }
+  .forgot-link { color: #64748b; text-decoration: none; font-weight: 600; transition: 0.2s; }
+  .forgot-link:hover { color: #f43f5e; text-decoration: underline; }
+  .btn-login,
+  .btn-passkey {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .btn-login {
+    background: #0f172a;
+    color: white;
+    box-shadow: 0 4px 6px rgba(15, 23, 42, 0.1);
+  }
+  .btn-login:hover {
+    background: #1e293b;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px rgba(15, 23, 42, 0.2);
+  }
+  .btn-passkey {
+    margin-top: 12px;
+    background: #fff1f2;
+    color: #be123c;
+    border: 1px solid #fecdd3;
+  }
+  .btn-passkey:hover {
+    background: #ffe4e6;
+    transform: translateY(-2px);
+  }
+  .admin-mode .btn-login {
+    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+  }
+  .admin-mode .btn-login:hover { box-shadow: 0 10px 20px rgba(244, 63, 94, 0.4); }
+  .admin-mode .brand-logo-container { background: #0f172a; }
+  .footer-text { margin-top: 30px; font-size: 13px; color: #64748b; }
+  .footer-text a { color: #0f172a; font-weight: 700; text-decoration: none; }
+  .footer-text a:hover { text-decoration: underline; }
+  .admin-toggle {
+    margin-top: 15px;
+    font-size: 11px;
+    color: #cbd5e1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: 0.2s;
+  }
+  .admin-toggle:hover { color: #f43f5e; }
+  .passkey-note {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #64748b;
+  }
+</style>
+
+<div class="login-wrapper">
+  <div class="login-card" id="loginCard">
+    <div class="brand-logo-container" id="logoBox">
+      <i class="fa-solid fa-layer-group"></i>
+    </div>
+
+    <h2 id="pageTitle">Welcome back</h2>
+    <p class="subtitle">Please enter your details to sign in.</p>
+
+    <div class="social-grid">
+      <a href="<%= socialAuthEnabled.apple ? '/auth/apple' : '#' %>" class="social-btn" title="<%= socialAuthEnabled.apple ? 'Apple' : 'Apple (Coming soon)' %>" <%= socialAuthEnabled.apple ? '' : 'aria-disabled=\"true\"' %>><i class="fa-brands fa-apple"></i></a>
+      <a href="<%= socialAuthEnabled.google ? '/auth/google' : '#' %>" class="social-btn" title="<%= socialAuthEnabled.google ? 'Google' : 'Google (Coming soon)' %>" <%= socialAuthEnabled.google ? '' : 'aria-disabled=\"true\"' %>><i class="fa-brands fa-google"></i></a>
+      <a href="<%= socialAuthEnabled.facebook ? '/auth/facebook' : '#' %>" class="social-btn" title="<%= socialAuthEnabled.facebook ? 'Facebook' : 'Facebook (Coming soon)' %>" <%= socialAuthEnabled.facebook ? '' : 'aria-disabled=\"true\"' %>><i class="fa-brands fa-facebook-f"></i></a>
+      <a href="<%= socialAuthEnabled.linkedin ? '/auth/linkedin' : '#' %>" class="social-btn" title="<%= socialAuthEnabled.linkedin ? 'LinkedIn' : 'LinkedIn (Coming soon)' %>" <%= socialAuthEnabled.linkedin ? '' : 'aria-disabled=\"true\"' %>><i class="fa-brands fa-linkedin-in"></i></a>
+    </div>
+
+    <div class="divider"><span>OR</span></div>
+
+    <form action="/login" method="POST" class="needs-validation" id="mainForm" novalidate>
+      <input type="hidden" name="adminLogin" id="adminFlag" value="false">
+
+      <div class="form-group">
+        <label class="form-label">Username / Email</label>
+        <input
+          type="text"
+          name="username"
+          id="username"
+          class="custom-input"
+          placeholder="Enter username or email"
+          autocomplete="username"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input
+          type="password"
+          name="password"
+          id="password"
+          class="custom-input"
+          placeholder="........"
+          autocomplete="current-password"
+          required
+        >
+      </div>
+
+      <div class="options-row">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <input type="checkbox" style="accent-color: #0f172a;">
+          Remember me
+        </label>
+        <a href="/forgot-password" class="forgot-link">Forgot password?</a>
+      </div>
+
+      <button class="btn-login" id="submitBtn">Sign in</button>
+    </form>
+
+    <button class="btn-passkey" id="passkeyBtn" type="button">
+      <i class="fa-solid fa-face-smile"></i> Sign in with Face Authentication
+    </button>
+    <div class="passkey-note">Use your device biometrics or Windows Hello if you already enabled face authentication in settings.</div>
+
+    <div class="footer-text">
+      Don't have an account yet? <a href="/signup">Sign Up</a>
+    </div>
+
+    <div class="admin-toggle" onclick="toggleAdminMode()">
+      <i class="fa-solid fa-lock"></i> <span id="adminText">Admin Access</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  let isAdmin = false;
+
+  function base64UrlToBuffer(value) {
+    const padding = "=".repeat((4 - (value.length % 4)) % 4);
+    const base64 = (value + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const raw = atob(base64);
+    return Uint8Array.from(raw, (char) => char.charCodeAt(0));
+  }
+
+  function bufferToBase64Url(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    bytes.forEach((byte) => {
+      binary += String.fromCharCode(byte);
+    });
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+  }
+
+  function serializeAssertion(credential) {
+    return {
+      id: credential.id,
+      rawId: bufferToBase64Url(credential.rawId),
+      type: credential.type,
+      response: {
+        authenticatorData: bufferToBase64Url(credential.response.authenticatorData),
+        clientDataJSON: bufferToBase64Url(credential.response.clientDataJSON),
+        signature: bufferToBase64Url(credential.response.signature),
+        userHandle: credential.response.userHandle
+          ? bufferToBase64Url(credential.response.userHandle)
+          : null,
+      },
+      clientExtensionResults: credential.getClientExtensionResults(),
+    };
+  }
+
+  function toggleAdminMode() {
+    const form = document.getElementById("mainForm");
+    const card = document.getElementById("loginCard");
+    const btn = document.getElementById("submitBtn");
+    const title = document.getElementById("pageTitle");
+    const adminFlag = document.getElementById("adminFlag");
+    const adminText = document.getElementById("adminText");
+    const logoBox = document.getElementById("logoBox");
+
+    isAdmin = !isAdmin;
+
+    if (isAdmin) {
+      form.action = "/login/admin";
+      adminFlag.value = "true";
+      card.classList.add("admin-mode");
+      btn.innerText = "Admin Login";
+      title.innerText = "Admin Portal";
+      adminText.innerText = "Back to User Login";
+      logoBox.innerHTML = '<i class="fa-solid fa-user-shield"></i>';
+    } else {
+      form.action = "/login";
+      adminFlag.value = "false";
+      card.classList.remove("admin-mode");
+      btn.innerText = "Sign in";
+      title.innerText = "Welcome back";
+      adminText.innerText = "Admin Access";
+      logoBox.innerHTML = '<i class="fa-solid fa-layer-group"></i>';
+    }
+  }
+
+  document.getElementById("passkeyBtn").addEventListener("click", async () => {
+    if (!window.PublicKeyCredential || !navigator.credentials) {
+      alert("Face authentication is not supported on this device.");
+      return;
+    }
+
+    const button = document.getElementById("passkeyBtn");
+    const originalText = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = "Checking device...";
+
+    try {
+      const startRes = await fetch("/login/face-auth/options", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const startData = await startRes.json();
+
+      if (!startData.ok) {
+        throw new Error(startData.message || "Could not start face login.");
+      }
+
+      const publicKey = {
+        ...startData.options,
+        challenge: base64UrlToBuffer(startData.options.challenge),
+        allowCredentials: (startData.options.allowCredentials || []).map((item) => ({
+          ...item,
+          id: base64UrlToBuffer(item.id),
+        })),
+      };
+
+      const credential = await navigator.credentials.get({ publicKey });
+      const verifyRes = await fetch("/login/face-auth/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: serializeAssertion(credential) }),
+      });
+
+      const verifyData = await verifyRes.json();
+
+      if (!verifyData.ok) {
+        throw new Error(verifyData.message || "Face authentication failed.");
+      }
+
+      window.location.href = verifyData.redirectUrl || "/listings";
+    } catch (error) {
+      alert(error.message || "Face / device login failed.");
+    } finally {
+      button.disabled = false;
+      button.innerHTML = originalText;
+    }
+  });
+</script>

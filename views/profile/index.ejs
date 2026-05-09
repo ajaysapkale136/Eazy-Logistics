@@ -1,0 +1,118 @@
+<% layout("layouts/boilerplate") %>
+
+<div class="container mt-5 profile-page <%= theme %>">
+
+
+    <!-- LEFT SIDEBAR -->
+    <div class="profile-sidebar glass-card hover-float">
+
+        <!-- USER HEADER -->
+        <div class="profile-header text-center">
+
+            <!-- Profile Picture -->
+            <img 
+                src="<%= currUser?.profileImage?.url || '/images/default-avatar.png' %>" 
+                class="profile-photo-lg floating-img"
+            >
+
+            <!-- Username & Email -->
+            <h3 class="mt-2"><%= currUser?.username %></h3>
+            <p class="text-muted"><%= currUser?.email %></p>
+
+        </div>
+
+        <!-- SIDEBAR MENU -->
+        <div class="profile-menu">
+
+            <a href="/profile/me" class="menu-item active">
+                <i class="fa-solid fa-user"></i> Profile Overview
+            </a>
+
+            <a href="/profile/edit" class="menu-item">
+                <i class="fa-solid fa-pen"></i> Edit Profile
+            </a>
+
+            <a href="/profile/listings" class="menu-item">
+                <i class="fa-solid fa-house"></i> My Listings
+            </a>
+
+            <a href="/dashboard" class="menu-item">
+               <i class="fa-solid fa-chart-pie"></i> Dashboard
+            </a>
+
+            <a href="/profile/password" class="menu-item">
+                <i class="fa-solid fa-lock"></i> Change Password
+            </a>
+
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="profile-actions mt-3">
+            <a href="/profile/edit" class="btn modern-btn w-100 mb-2">Save Changes</a>
+            <a href="/logout" class="btn logout-btn w-100">Log Out</a>
+        </div>
+
+    </div>
+
+
+
+    <!-- RIGHT MAIN CONTENT -->
+    <div class="profile-main glass-card hover-float">
+        <div class="text-center">
+
+            <!-- BIG PROFILE PHOTO -->
+            <img 
+                src="<%= currUser?.profileImage?.url || '/images/default-avatar.png' %>" 
+                class="profile-photo-xl floating-img"
+            >
+
+            <!-- Username + Email -->
+            <h2 class="mt-3"><%= currUser?.username %></h2>
+            <p class="text-muted"><%= currUser?.email %></p>
+
+
+            <!-- Bio -->
+            <% if (currUser?.bio) { %>
+                <p class="bio-text">
+                    <%= currUser.bio %>
+                </p>
+            <% } %>
+
+            <!-- Phone -->
+            <% if (currUser?.phone) { %>
+                <p class="text-number">
+                    <i class="fa-solid fa-phone"></i>
+                    <%= currUser.phone %>
+                </p>
+            <% } %>
+
+            <!-- Location -->
+            <% if (currUser?.address) { %>
+                <p class="location-text">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <%= currUser.address %>
+                </p>
+            <% } %>
+
+
+            <!-- SOCIAL LINKS -->
+            <div class="social-row mt-3">
+
+                <% if (currUser?.socialLinks?.instagram) { %>
+                    <a href="<%= currUser.socialLinks.instagram %>" class="social-btn">
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+                <% } %>
+
+                <% if (currUser?.socialLinks?.linkedin) { %>
+                    <a href="<%= currUser.socialLinks.linkedin %>" class="social-btn">
+                        <i class="fa-brands fa-linkedin"></i>
+                    </a>
+                <% } %>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>

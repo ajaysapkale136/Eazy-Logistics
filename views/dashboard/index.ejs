@@ -1,0 +1,245 @@
+<% layout("layouts/boilerplate") %>
+<link rel="stylesheet" href="/css/user-dashboard.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style> 
+  .container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; } 
+</style>
+
+<div class="dashboard-container">
+
+  <aside class="sidebar">
+    <div class="glass-card profile-section">
+      <img src="<%= currUser.profileImage?.url || '/images/default-avatar.png' %>" class="profile-img">
+      <h5 style="margin:0; font-weight:700;"><%= currUser.username %></h5>
+      <p style="margin:5px 0 0; font-size:12px; color:#666;">User Dashboard</p>
+      
+      <div style="margin-top:15px; background:#fff1f2; color:#f43f5e; padding:5px 10px; border-radius:20px; font-size:12px; font-weight:600; display:inline-block;">
+        Active Today: <span id="timer">0m</span>
+      </div>
+    </div>
+
+    <nav class="glass-card nav-menu">
+      <a href="/dashboard" class="nav-link active"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+      <a href="/profile/edit" class="nav-link"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
+      <a href="/dashboard/bookings" class="nav-link"><i class="fa-solid fa-suitcase"></i> Booking Manager</a>
+      <a href="/listings" class="nav-link"><i class="fa-solid fa-house"></i> My Listings</a>
+      <a href="/dashboard/details" class="nav-link"><i class="fa-solid fa-wallet"></i> Payment Details</a>
+      <a href="/logout" class="nav-link danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-label">Total Listings</div>
+        <div class="stat-value"><%= stats.listings %></div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Total Bookings</div>
+        <div class="stat-value"><%= stats.bookings %></div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Active Trips</div>
+        <div class="stat-value"><%= stats.active %></div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value">₹<%= stats.revenue.toLocaleString("en-IN") %></div>
+      </div>
+    </div>
+
+    <div class="chart-container glass-card">
+      <div class="chart-header">
+         <h4>Bookings & Revenue — Analytics</h4>
+         <select id="chartFilter" class="chart-select" onchange="updateChartRange()">
+            <option value="6">Last 6 months</option>
+            <option value="12">Last 12 months</option>
+         </select>
+      </div>
+      
+      <div class="chart-wrapper">
+        <canvas id="mainChart"></canvas>
+      </div>
+    </div>
+
+    <div class="table-container">
+       <div class="table-header">Top Bookings</div>
+       <table class="custom-table">
+         <thead>
+           <tr>
+             <th>Listing</th>
+             <th>Guest</th>
+             <th>Price</th>
+             <th>Status</th>
+             <th>QR Code</th>
+           </tr>
+         </thead>
+         <tbody>
+           <% if(myBookings.length > 0) { %>
+             <% myBookings.slice(0, 5).forEach(b => { %>
+               <tr>
+                 <td><%= b.listing ? b.listing.title : 'Deleted' %></td>
+                 <td><%= b.user ? b.user.username : 'Guest' %></td>
+                 <td style="font-weight:700;">₹<%= b.totalPrice.toLocaleString() %></td>
+                 <td>
+                    <span class="status-badge <%= b.status === 'confirmed' ? 'bg-success' : 'bg-danger' %>">
+                       <%= b.status %>
+                    </span>
+                 </td>
+                 <td>
+                    <img src="<%= b.qrCode %>" style="width:30px; height:30px; cursor:zoom-in;">
+                 </td>
+               </tr>
+             <% }) %>
+           <% } else { %>
+             <tr><td colspan="5" style="text-align:center;">No data available</td></tr>
+           <% } %>
+         </tbody>
+       </table>
+    </div>
+  </main>
+
+  <aside class="right-sidebar">
+    
+    <div class="upcoming-card">
+       <div class="upcoming-header">Upcoming Bookings</div>
+       
+       <% if(stats.active > 0) { %>
+         <% 
+            const upcoming = myBookings.filter(b => b.status === 'confirmed' && new Date(b.checkOut) > new Date());
+            upcoming.slice(0, 5).forEach(b => { 
+         %>
+           <div class="booking-item">
+             <div class="booking-info">
+               <span class="booking-title"><%= b.listing ? b.listing.title : 'Unknown Property' %></span>
+               <span class="booking-meta">
+                 <%= b.user ? b.user.username : 'Guest' %> • <%= new Date(b.checkIn).toLocaleDateString('en-IN', {day:'numeric', month:'short'}) %>
+               </span>
+             </div>
+             <div class="booking-price">₹<%= b.totalPrice.toLocaleString() %></div>
+           </div>
+         <% }) %>
+
+         <% if(upcoming.length === 0) { %>
+            <p style="font-size:12px; color:#999; padding:10px 0;">No active bookings right now.</p>
+         <% } %>
+
+       <% } else { %>
+         <p style="font-size:12px; color:#999; padding:10px 0;">No upcoming bookings.</p>
+       <% } %>
+
+       <a href="/dashboard/bookings" class="view-all-link">Manage bookings</a>
+    </div>
+
+    <div class="glass-card">
+      <h5 style="margin-bottom:15px; font-weight:700; font-size:14px;">Quick Actions</h5>
+      <a href="/listings/new" class="btn-primary-block">Add Listing</a>
+      <button class="btn-primary-block" style="background:#f3f4f6; color:#333; margin-top:10px;">Invite Friend</button>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+  // 1. RAW DATA (Passed from Controller)
+  const allLabels = <%- chart.labels %>;
+  const allRevenue = <%- chart.spending %>;
+  const allBookings = <%- chart.bookings %>;
+
+  // 2. CHART CONFIGURATION
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  let myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: allLabels.slice(-6), 
+      datasets: [
+        {
+          label: 'Revenue',
+          data: allRevenue.slice(-6),
+          borderColor: '#f43f5e',
+          backgroundColor: 'rgba(244, 63, 94, 0.1)',
+          tension: 0.4,
+          fill: true,
+          pointRadius: 4
+        },
+        {
+          label: 'Bookings',
+          data: allBookings.slice(-6),
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          tension: 0.4,
+          fill: true,
+          pointRadius: 4,
+          hidden: true
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  // 3. TOGGLE CHART RANGE
+  function updateChartRange() {
+    const range = document.getElementById('chartFilter').value;
+    const sliceCount = parseInt(range) * -1; 
+
+    myChart.data.labels = allLabels.slice(sliceCount);
+    myChart.data.datasets[0].data = allRevenue.slice(sliceCount);
+    myChart.data.datasets[1].data = allBookings.slice(sliceCount);
+    myChart.update();
+  }
+
+  // 4. ACTIVE TIMER LOGIC (Daily Reset)
+  (function() {
+      const STORAGE_KEY_DATE = 'dashboard_last_active_date';
+      const STORAGE_KEY_SECONDS = 'dashboard_active_seconds';
+      const timerElement = document.getElementById('timer');
+      
+      // Initial Load
+      let activeSeconds = 0;
+      const todayStr = new Date().toDateString(); // e.g. "Wed Oct 25 2023"
+      const storedDate = localStorage.getItem(STORAGE_KEY_DATE);
+
+      // Check for Midnight Reset
+      if (storedDate !== todayStr) {
+          // New day detected (or first visit) -> Reset
+          activeSeconds = 0;
+          localStorage.setItem(STORAGE_KEY_DATE, todayStr);
+          localStorage.setItem(STORAGE_KEY_SECONDS, 0);
+      } else {
+          // Same day -> Load previous time
+          activeSeconds = parseInt(localStorage.getItem(STORAGE_KEY_SECONDS)) || 0;
+      }
+
+      // Start Counting
+      setInterval(() => {
+          // Double-check date inside loop (handles midnight while page is open)
+          const currentDayStr = new Date().toDateString();
+          if (currentDayStr !== localStorage.getItem(STORAGE_KEY_DATE)) {
+              activeSeconds = 0;
+              localStorage.setItem(STORAGE_KEY_DATE, currentDayStr);
+          }
+
+          // Increment
+          activeSeconds++;
+          
+          // Save
+          localStorage.setItem(STORAGE_KEY_SECONDS, activeSeconds);
+
+          // Display Format: "2h 15m" or "45m"
+          const h = Math.floor(activeSeconds / 3600);
+          const m = Math.floor((activeSeconds % 3600) / 60);
+          
+          if (h > 0) {
+              timerElement.innerText = `${h}h ${m}m`;
+          } else {
+              timerElement.innerText = `${m}m`;
+          }
+      }, 1000);
+  })();
+</script>

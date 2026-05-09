@@ -1,0 +1,237 @@
+<% layout("layouts/boilerplate") %>
+<link rel="stylesheet" href="/css/user-dashboard.css">
+
+<style>
+  .switch-container { display: flex; gap: 10px; margin-bottom: 20px; }
+  .switch-btn {
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+    transition: 0.2s;
+  }
+  .switch-btn.active { background: #f43f5e; color: white; box-shadow: 0 4px 10px rgba(244, 63, 94, 0.3); }
+  .switch-btn.inactive { background: white; color: #555; border: 1px solid #e5e7eb; }
+  .switch-btn.inactive:hover { background: #f9fafb; }
+  .hidden-section { display: none; }
+  .mini-form { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .mini-input {
+    padding: 6px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 12px;
+    min-width: 120px;
+  }
+  .mini-btn {
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 8px;
+  }
+  .mini-btn.gray { color: #0f172a; background: #e2e8f0; }
+  .mini-btn.green { color: white; background: #16a34a; }
+  .mini-btn.blue { color: #1d4ed8; background: #dbeafe; }
+  .safety-note { font-size: 11px; color: #dc2626; margin-top: 6px; }
+</style>
+
+<div class="dashboard-container <%= theme %>">
+  <aside class="sidebar">
+    <div class="glass-card profile-section">
+      <img src="<%= currUser.profileImage?.url || '/images/default-avatar.png' %>" class="profile-img">
+      <h5 style="margin:0; font-weight:700;"><%= currUser.username %></h5>
+      <p style="margin:5px 0 0; font-size:12px; color:#666;">User Dashboard</p>
+    </div>
+    <nav class="glass-card nav-menu">
+      <a href="/dashboard" class="nav-link"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+      <a href="/profile/edit" class="nav-link"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
+      <a href="/dashboard/bookings" class="nav-link active"><i class="fa-solid fa-suitcase"></i> Bookings Manager</a>
+      <a href="/listings" class="nav-link"><i class="fa-solid fa-house"></i> My Listings</a>
+      <a href="/logout" class="nav-link danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <main class="main-content" style="grid-column: span 2;">
+    <div class="glass-card" style="min-height: 85vh;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h3 style="margin:0; font-weight:800; font-size:20px;">Bookings Manager</h3>
+        <div class="switch-container">
+          <button class="switch-btn active" onclick="showSection('host')">Incoming Reservations</button>
+          <button class="switch-btn inactive" onclick="showSection('guest')">My Trips</button>
+        </div>
+      </div>
+
+      <div id="host-section">
+        <div class="table-container" style="box-shadow:none; border:none; padding:0;">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Listing</th>
+                <th>Guest</th>
+                <th>Dates</th>
+                <th>Status</th>
+                <th>Actions (Host)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (hostBookings.length > 0) { %>
+                <% hostBookings.forEach((b) => { %>
+                  <tr>
+                    <td>
+                      <strong><%= b.listing ? b.listing.title : 'Deleted Listing' %></strong>
+                      <div style="font-size:11px; color:#666;">Total: Rs.<%= b.totalPrice.toLocaleString() %></div>
+                    </td>
+                    <td>
+                      <div style="font-weight:600;"><%= b.user ? b.user.username : 'Unknown' %></div>
+                      <div style="font-size:11px; color:#888;">Guest</div>
+                    </td>
+                    <td>
+                      <span style="font-size:12px;">
+                        <%= new Date(b.checkIn).toLocaleDateString() %> - <%= new Date(b.checkOut).toLocaleDateString() %>
+                      </span>
+                    </td>
+                    <td>
+                      <span class="status-badge <%= b.status === 'confirmed' ? 'bg-success' : (b.status === 'cancelled' ? 'bg-danger' : 'bg-pending') %>">
+                        <%= b.status %>
+                      </span>
+                    </td>
+                    <td>
+                      <% if (b.status !== 'cancelled' && b.status !== 'refunded') { %>
+                        <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                          <% if (b.status !== 'confirmed') { %>
+                            <form action="/dashboard/host/booking/<%= b._id %>/approve" method="POST">
+                              <button class="status-badge bg-success" style="border:none; cursor:pointer;">Approve</button>
+                            </form>
+                          <% } %>
+
+                          <form action="/dashboard/host/booking/<%= b._id %>/cancel" method="POST" onsubmit="return confirm('Cancel this reservation?');">
+                            <button class="status-badge bg-danger" style="border:none; cursor:pointer;">Cancel</button>
+                          </form>
+
+                          <% if (b.status === 'confirmed') { %>
+                            <form action="/dashboard/host/booking/<%= b._id %>/refund" method="POST" onsubmit="return confirm('Refund this reservation?');">
+                              <button class="status-badge" style="background:#333; color:white; border:none; cursor:pointer;">Refund</button>
+                            </form>
+                          <% } %>
+                        </div>
+                      <% } else { %>
+                        <span style="color:#aaa;">Closed</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr><td colspan="5" style="text-align:center; padding:30px;">No reservations found on your listings.</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="guest-section" class="hidden-section">
+        <div class="table-container" style="box-shadow:none; border:none; padding:0;">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>Host</th>
+                <th>Dates</th>
+                <th>Status</th>
+                <th>Stay Safety</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (myTrips.length > 0) { %>
+                <% myTrips.forEach((t) => { %>
+                  <tr>
+                    <td>
+                      <strong><%= t.listing ? t.listing.title : 'Deleted' %></strong>
+                      <div style="font-size:11px;">Rs.<%= t.totalPrice %></div>
+                    </td>
+                    <td><%= t.listing && t.listing.owner ? t.listing.owner.username : 'Unknown' %></td>
+                    <td>
+                      <div><%= new Date(t.checkIn).toLocaleDateString() %> - <%= new Date(t.checkOut).toLocaleDateString() %></div>
+                      <div style="font-size:11px; color:#888;">Nights: <%= t.nights %></div>
+                    </td>
+                    <td>
+                      <span class="status-badge <%= t.status === 'confirmed' ? 'bg-success' : (t.status === 'cancelled' ? 'bg-danger' : 'bg-pending') %>">
+                        <%= t.status %>
+                      </span>
+                    </td>
+                    <td>
+                      <span class="status-badge <%= t.stayStatus === 'checked_out' ? 'bg-success' : (t.stayStatus === 'safety_alert' ? 'bg-danger' : (t.stayStatus === 'overdue' ? 'bg-danger' : 'bg-pending')) %>">
+                        <%= (t.stayStatus || 'upcoming').replace('_', ' ') %>
+                      </span>
+                      <% if (t.safetyAlert?.autoPoliceRequestLogged) { %>
+                        <div class="safety-note">Emergency escalation logged</div>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (t.status === 'confirmed' && !t.checkedOutAt) { %>
+                        <form action="/dashboard/booking/<%= t._id %>/checkout-otp" method="POST" style="margin-bottom:8px;">
+                          <button class="mini-btn gray">Send Checkout OTP</button>
+                        </form>
+
+                        <form action="/dashboard/booking/<%= t._id %>/checkout" method="POST" class="mini-form">
+                          <input type="text" name="checkoutOtp" class="mini-input" placeholder="Enter OTP" required>
+                          <button class="mini-btn green">Complete Checkout</button>
+                        </form>
+
+                        <form action="/dashboard/booking/<%= t._id %>/extend" method="POST" class="mini-form">
+                          <input
+                            type="date"
+                            name="newCheckOut"
+                            class="mini-input"
+                            min="<%= new Date(t.checkOut.getTime() + 86400000).toISOString().split('T')[0] %>"
+                            required
+                          >
+                          <button class="mini-btn blue">Extend Stay</button>
+                        </form>
+                      <% } %>
+
+                      <% if (t.status === 'confirmed' || t.status === 'pending') { %>
+                        <form action="/dashboard/booking/<%= t._id %>/cancel" method="POST" onsubmit="return confirm('Cancel trip?');">
+                          <button style="color:#ef4444; background:none; border:none; font-weight:700; cursor:pointer; font-size:12px;">Cancel Trip</button>
+                        </form>
+                      <% } else if (t.checkedOutAt) { %>
+                        <span style="color:#16a34a; font-weight:700; font-size:12px;">Checked out on <%= new Date(t.checkedOutAt).toLocaleDateString() %></span>
+                      <% } else { %>
+                        <span style="color:#aaa;">-</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr><td colspan="6" style="text-align:center; padding:30px;">You haven't booked any trips yet.</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  function showSection(type) {
+    const hostSec = document.getElementById("host-section");
+    const guestSec = document.getElementById("guest-section");
+    const btns = document.querySelectorAll(".switch-btn");
+
+    if (type === "host") {
+      hostSec.style.display = "block";
+      guestSec.style.display = "none";
+      btns[0].className = "switch-btn active";
+      btns[1].className = "switch-btn inactive";
+    } else {
+      hostSec.style.display = "none";
+      guestSec.style.display = "block";
+      btns[0].className = "switch-btn inactive";
+      btns[1].className = "switch-btn active";
+    }
+  }
+</script>

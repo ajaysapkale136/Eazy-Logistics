@@ -1,0 +1,159 @@
+<% layout("layouts/boilerplate") %>
+
+<link rel="stylesheet" href="/css/userDashboard.css">
+
+<div class="dashboard-wrapper">
+
+  <aside class="sidebar-panel">
+    <img src="<%= currUser.profileImage?.url || '/images/default-avatar.png' %>" alt="User" class="user-avatar">
+    <h3><%= currUser.username %></h3>
+    <p style="font-size:13px; color:#666; margin-bottom:20px;"><%= currUser.email %></p>
+
+    <hr style="border-top:1px solid #eee; margin:20px 0;">
+
+    <div style="text-align:left;">
+        <h5 style="font-size:14px; margin-bottom:15px; color:#444;">Your Bank Details</h5>
+        
+        <div class="bank-card">
+            <div class="bank-label">Bank Name</div>
+            <div class="bank-val"><%= bankDetails.bankName %></div>
+            
+            <div class="bank-label">Account Number</div>
+            <div class="bank-val"><%= bankDetails.accountNumber %></div>
+
+            <div class="bank-label">IFSC Code</div>
+            <div class="bank-val" style="margin-bottom:0;"><%= bankDetails.ifsc %></div>
+        </div>
+    </div>
+  </aside>
+
+
+  <main class="main-panel">
+
+    <div class="glass-header">
+        <div>
+            <h2 style="margin:0; font-size:24px;">My Dashboard</h2>
+            <p style="margin:0; font-size:13px; color:#666;">Manage your trips and transactions</p>
+        </div>
+        <div style="text-align:right;">
+            <h2 style="margin:0; color:#a91b0d;"><%= myHistory.length %></h2>
+            <small>Total Trips</small>
+        </div>
+    </div>
+
+    <div class="history-container">
+        <h4 style="margin-bottom:20px;">Booking History</h4>
+        
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Listing</th>
+                    <th>Dates (In - Out)</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if(myHistory.length > 0) { %>
+                    <% myHistory.forEach(b => { %>
+                    <tr>
+                        <td>
+                            <% if(b.listing) { %>
+                                <div style="display:flex; align-items:center;">
+                                    <img src="<%= b.listing.image?.url || '/images/default.jpg' %>" class="listing-thumb">
+                                    <div>
+                                        <div style="font-weight:600; font-size:14px;"><%= b.listing.title %></div>
+                                        <div style="font-size:11px; color:#888;"><%= b.listing.location %></div>
+                                    </div>
+                                </div>
+                            <% } else { %>
+                                <span style="color:red;">Property Removed</span>
+                            <% } %>
+                        </td>
+                        <td>
+                           <div style="font-size:13px; font-weight:500;">
+                               <%= new Date(b.checkIn).toLocaleDateString('en-IN') %>
+                           </div>
+                           <div style="font-size:12px; color:#666;">
+                               to <%= new Date(b.checkOut).toLocaleDateString('en-IN') %>
+                           </div>
+                        </td>
+                        <td style="font-weight:600;">₹<%= b.totalPrice.toLocaleString("en-IN") %></td>
+                        <td>
+                            <span class="badge badge-<%= b.status %>"><%= b.status %></span>
+                        </td>
+                        <td>
+                            <% if(b.status !== 'cancelled') { %>
+                                <button class="btn-action btn-modify" 
+                                        onclick="openModifyModal('<%= b._id %>', '<%= b.checkIn.toISOString().split('T')[0] %>', '<%= b.checkOut.toISOString().split('T')[0] %>')">
+                                    Extend
+                                </button>
+                                
+                                <form action="/user/dashboard/booking/<%= b._id %>/cancel" method="POST" style="display:inline;" onsubmit="return confirm('Cancel this trip?');">
+                                    <button class="btn-action btn-cancel">Cancel</button>
+                                </form>
+                            <% } else { %>
+                                <span style="color:#aaa; font-size:12px;">Cancelled</span>
+                            <% } %>
+                        </td>
+                    </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr><td colspan="5" style="text-align:center; padding:30px;">No booking history found.</td></tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+  </main>
+</div>
+
+<div id="modifyModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h3 style="margin-top:0;">Modify Dates</h3>
+        <p style="font-size:13px; color:#666; margin-bottom:20px;">Extend your stay or change dates.</p>
+        
+        <form id="modifyForm" method="POST" action="">
+            <div class="form-group">
+                <label>New Check-In</label>
+                <input type="date" name="newCheckIn" id="modalCheckIn" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>New Check-Out</label>
+                <input type="date" name="newCheckOut" id="modalCheckOut" class="form-control" required>
+            </div>
+            <button type="submit" class="btn-primary">Update Booking</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById("modifyModal");
+    const form = document.getElementById("modifyForm");
+    const inInput = document.getElementById("modalCheckIn");
+    const outInput = document.getElementById("modalCheckOut");
+
+    function openModifyModal(id, currentIn, currentOut) {
+        // Set Form Action URL
+        form.action = `/user/dashboard/booking/${id}/modify`;
+        
+        // Set Current Values
+        inInput.value = currentIn;
+        outInput.value = currentOut;
+        
+        modal.style.display = "block";
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
+    }
+
+    // Close if clicked outside
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
