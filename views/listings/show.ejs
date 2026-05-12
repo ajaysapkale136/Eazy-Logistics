@@ -1381,11 +1381,12 @@
     pruneNearbyPlacesCache();
     const key = getNearbyCacheKey(intent);
     const hit = nearbyPlacesCache.get(key);
-    if (!hit || !Array.isArray(hit.places)) return null;
+    if (!hit || !Array.isArray(hit.places) || hit.places.length === 0) return null;
     return hit.places.map(cloneNearbyPlace);
   }
 
   function writeNearbyPlacesCache(intent, places) {
+    if (!Array.isArray(places) || places.length === 0) return;
     const key = getNearbyCacheKey(intent);
     nearbyPlacesCache.set(key, {
       createdAt: Date.now(),

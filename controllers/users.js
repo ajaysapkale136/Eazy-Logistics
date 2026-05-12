@@ -41,6 +41,13 @@ function loginUser(req, user) {
   });
 }
 
+function persistSession(req) {
+  return new Promise((resolve) => {
+    if (!req?.session || typeof req.session.save !== "function") return resolve();
+    req.session.save(() => resolve());
+  });
+}
+
 function normalizeEmail(value) {
   return String(value || "")
     .trim()
@@ -484,6 +491,7 @@ module.exports.renderAdminCodeForm = async (req, res) => {
 module.exports.login = async (req, res) => {
   req.flash("success", "Welcome back to Eazy-Logistics!");
   const redirectUrl = res.locals.redirectUrl || "/listings";
+  await persistSession(req);
   res.redirect(redirectUrl);
 };
 
@@ -496,12 +504,13 @@ module.exports.completeSocialLogin = async (req, res) => {
   const provider = req.socialProvider || "Social account";
   await clearFailedAttempts(req.user);
 
-  if (req.user.role === "admin") {
-    if (!adminNeedsSecurityCode(req.user)) {
-      req.session.adminSecurityVerifiedFor = String(req.user._id);
-      req.flash("success", `${provider} login successful. Welcome Admin!`);
-      return res.redirect("/admin");
-    }
+    if (req.user.role === "admin") {
+      if (!adminNeedsSecurityCode(req.user)) {
+        req.session.adminSecurityVerifiedFor = String(req.user._id);
+        req.flash("success", `${provider} login successful. Welcome Admin!`);
+        await persistSession(req);
+        return res.redirect("/admin");
+      }
 
     await ensureAdminSecurityCode(req.user, {
       regenerate: true,
@@ -510,17 +519,19 @@ module.exports.completeSocialLogin = async (req, res) => {
     });
     await req.user.save();
 
-    req.session.adminSecurityPendingUserId = String(req.user._id);
-    delete req.session.adminSecurityVerifiedFor;
+      req.session.adminSecurityPendingUserId = String(req.user._id);
+      delete req.session.adminSecurityVerifiedFor;
 
-    req.flash("success", "Admin security code sent to your email.");
-    return res.redirect("/login/admin/code");
-  }
+      req.flash("success", "Admin security code sent to your email.");
+      await persistSession(req);
+      return res.redirect("/login/admin/code");
+    }
 
   const redirectUrl = req.session.redirectUrl || "/listings";
   delete req.session.redirectUrl;
 
   req.flash("success", `${provider} login successful.`);
+  await persistSession(req);
   return res.redirect(redirectUrl);
 };
 
@@ -836,6 +847,8 @@ module.exports.logout = (req, res, next) => {
     delete req.session.passkeyAuthentication;
 
     req.flash("success", "Logged out successfully!");
-    res.redirect("/listings");
+    req.session.save(() => {
+      res.redirect("/listings");
+    });
   });
 };
