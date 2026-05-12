@@ -1,7 +1,7 @@
 // const express = require("express");
 // const router = express.Router();
 // const bookingController = require("../controllers/bookingCashfreeController");
-// const { isLoggedIn } = require("../middleware");
+// const { isLoggedIn } = require("../appMiddleware");
 
 // router.get(
 //   "/confirm/:listingId",
@@ -38,7 +38,7 @@
 const express = require("express");
 const router = express.Router({ mergeParams: true });
 const bookingController = require("../controllers/bookingCashfreeController");
-const { isLoggedIn } = require("../middleware");
+const { isLoggedIn } = require("../appMiddleware");
 
 // 1. Reservation Page
 router.get("/confirm/:listingId", isLoggedIn, bookingController.showBookingPage);

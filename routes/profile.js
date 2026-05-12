@@ -6,7 +6,7 @@ const upload = multer({ storage });
 
 const User = require("../models/user");
 const Listing = require("../models/listing");
-const { isLoggedIn } = require("../middleware");
+const { isLoggedIn } = require("../appMiddleware");
 
 /* ============================================================
    REDIRECT /profile → /profile/me

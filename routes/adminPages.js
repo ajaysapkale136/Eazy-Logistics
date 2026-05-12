@@ -1,7 +1,7 @@
 // routes/adminPages.js
 const express = require("express");
 const router = express.Router();
-const { isAdmin } = require("../middleware");
+const { isAdmin } = require("../appMiddleware");
 
 // prevent route conflicts with /admin/api (optional)
 router.use((req, res, next) => {

@@ -5,7 +5,7 @@ const wrapAsync = require("../utils/wrapAsync");
 const ListingController = require("../controllers/listings");
 const Listing = require("../models/listing");
 
-const { isLoggedIn, isOwner, validateListing } = require("../middleware");
+const { isLoggedIn, isOwner, validateListing } = require("../appMiddleware");
 
 const multer = require("multer");
 const { storage } = require("../cloudConfig");

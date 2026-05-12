@@ -1,7 +1,7 @@
 // routes/adminApi.js
 const express = require("express");
 const router = express.Router();
-const { isAdmin } = require("../middleware");
+const { isAdmin } = require("../appMiddleware");
 const adminController = require("../controllers/adminController");
 
 // SUMMARY + CHARTS

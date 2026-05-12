@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const dashController = require("../controllers/newDashboardController");
-const { isLoggedIn } = require("../middleware");
+const { isLoggedIn } = require("../appMiddleware");
 const multer = require("multer");
 const { storage } = require("../cloudConfig");
 const upload = multer({ storage });

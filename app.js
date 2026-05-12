@@ -22,7 +22,7 @@ const {
   getSocialAuthDiagnostics,
   strategyEnabled,
 } = require("./utils/socialAuth");
-const { themeMiddleware } = require("./middleware");
+const { themeMiddleware } = require("./appMiddleware");
 const { refreshBookingSafetyStates } = require("./utils/bookingSafety");
 
 const listingsRouter = require("./routes/listing");

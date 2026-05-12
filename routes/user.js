@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync.js");
 const passport = require("passport");
-const { isLoggedIn, saveRedirectUrl } = require("../middleware.js");
+const { isLoggedIn, saveRedirectUrl } = require("../appMiddleware.js");
 const userController = require("../controllers/users.js");
 
 function ensureSocialStrategy(strategyName, label) {
