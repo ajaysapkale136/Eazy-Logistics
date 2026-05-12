@@ -1593,6 +1593,27 @@
     const cached = readNearbyPlacesCache(intent);
     if (cached) return cached;
 
+    try {
+      const radiusKm = getActiveSearchRadiusKm();
+      const params = new URLSearchParams({
+        intent,
+        radiusKm: String(radiusKm),
+        lat: String(listingCoords[1]),
+        lng: String(listingCoords[0])
+      });
+      const response = await fetch(`/api/listings/nearby-places?${params.toString()}`);
+      if (response.ok) {
+        const payload = await response.json();
+        const serverPlaces = Array.isArray(payload.places) ? payload.places : [];
+        if (serverPlaces.length > 0) {
+          writeNearbyPlacesCache(intent, serverPlaces);
+          return serverPlaces;
+        }
+      }
+    } catch (error) {
+      console.warn("Nearby places API fallback error:", error.message || error);
+    }
+
     const mapboxPlaces = await fetchNearbyPlacesFromMapbox(intent);
     if (mapboxPlaces.length > 0) {
       writeNearbyPlacesCache(intent, mapboxPlaces);

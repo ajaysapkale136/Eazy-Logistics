@@ -11,6 +11,7 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError");
 const session = require("express-session");
+const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -39,6 +40,7 @@ const bookingRoutes = require("./routes/booking");
 
 const isVercelRuntime = Boolean(process.env.VERCEL || process.env.VERCEL_URL);
 const enableBackgroundWorkers = !isVercelRuntime;
+const sessionSecret = process.env.SESSION_SECRET || process.env.SECRET || "mysupersecretcode";
 let dbConnectPromise = null;
 
 function connectDatabase() {
@@ -123,11 +125,35 @@ app.use(async (_req, _res, next) => {
 });
 
 const sessionConfig = {
-  secret: process.env.SESSION_SECRET || "mysupersecretcode",
+  secret: sessionSecret,
   resave: false,
-  saveUninitialized: true,
-  cookie: { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 7 },
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  },
 };
+
+if (process.env.ATLASDB_URL) {
+  const sessionStore = MongoStore.create({
+    mongoUrl: process.env.ATLASDB_URL,
+    collectionName: "sessions",
+    ttl: 60 * 60 * 24 * 7,
+    autoRemove: "native",
+  });
+
+  sessionStore.on("error", (error) => {
+    console.error("Session store error:", error.message || error);
+  });
+
+  sessionConfig.store = sessionStore;
+}
+
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
 
 app.use(session(sessionConfig));
 app.use(flash());
