@@ -137,6 +137,67 @@ async function fetchNearbyPlacesFromMapbox(intent, lat, lng, radiusKm) {
   return collected;
 }
 
+function normalizeNominatimPlace(place) {
+  const lng = Number(place?.lon);
+  const lat = Number(place?.lat);
+  if (!Number.isFinite(lng) || !Number.isFinite(lat)) return null;
+
+  const title =
+    place.name ||
+    place.display_name?.split(",")?.[0]?.trim() ||
+    "Nearby place";
+  const subtitle = place.display_name || "";
+
+  return {
+    id: place.place_id ? `nom-${place.place_id}` : `${lng},${lat}`,
+    coordinates: [lng, lat],
+    title,
+    subtitle,
+  };
+}
+
+async function fetchNearbyPlacesFromNominatim(intent, lat, lng, radiusKm) {
+  const [minLng, minLat, maxLng, maxLat] = buildRadiusBBox(lng, lat, radiusKm);
+  const hints = MAPBOX_QUERY_HINTS[intent] || MAPBOX_QUERY_HINTS.food;
+  const results = [];
+  const seen = new Set();
+
+  for (const hint of hints) {
+    try {
+      const response = await axios.get("https://nominatim.openstreetmap.org/search", {
+        params: {
+          q: hint,
+          format: "jsonv2",
+          limit: 8,
+          bounded: 1,
+          viewbox: `${minLng},${maxLat},${maxLng},${minLat}`,
+        },
+        headers: {
+          "User-Agent": "Eazy-Logistics/1.0 (nearby-poi-search)",
+        },
+        timeout: 12000,
+      });
+
+      const places = Array.isArray(response.data) ? response.data : [];
+      for (const item of places) {
+        const normalized = normalizeNominatimPlace(item);
+        if (!normalized) continue;
+        const key =
+          normalized.id ||
+          `${normalized.coordinates[0].toFixed(5)},${normalized.coordinates[1].toFixed(5)}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        results.push(normalized);
+        if (results.length >= 16) return results;
+      }
+    } catch (_error) {
+      // continue to next hint
+    }
+  }
+
+  return results;
+}
+
 // Search listings (with optional text and category)
 router.get("/search", async (req, res) => {
   try {
@@ -220,6 +281,10 @@ router.get("/nearby-places", async (req, res) => {
 
     if (!places.length) {
       places = await fetchNearbyPlacesFromMapbox(intent, lat, lng, radiusKm);
+    }
+
+    if (!places.length) {
+      places = await fetchNearbyPlacesFromNominatim(intent, lat, lng, radiusKm);
     }
 
     if (!places.length && !responseData && lastError) {
