@@ -106,6 +106,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
+app.get("/healthz", (_req, res) => {
+  res.status(200).json({
+    ok: true,
+    dbReadyState: mongoose.connection.readyState,
+    runtime: isVercelRuntime ? "vercel" : "server",
+  });
+});
 app.use(async (_req, _res, next) => {
   try {
     await connectDatabase();
