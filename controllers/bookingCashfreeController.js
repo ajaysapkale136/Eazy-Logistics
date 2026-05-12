@@ -37,8 +37,15 @@ const CF_BASE =
 /* =====================================================
    RECEIPT DIRECTORY
 ===================================================== */
-const RECEIPTS_DIR = path.join(__dirname, "..", "receipts");
-if (!fs.existsSync(RECEIPTS_DIR)) fs.mkdirSync(RECEIPTS_DIR);
+const IS_VERCEL_RUNTIME = Boolean(process.env.VERCEL || process.env.VERCEL_URL);
+const RECEIPTS_DIR = IS_VERCEL_RUNTIME
+  ? path.join("/tmp", "eazy-logistics-receipts")
+  : path.join(__dirname, "..", "receipts");
+
+// Vercel filesystem is read-only except /tmp.
+if (!fs.existsSync(RECEIPTS_DIR)) {
+  fs.mkdirSync(RECEIPTS_DIR, { recursive: true });
+}
 
 
 /* =====================================================
