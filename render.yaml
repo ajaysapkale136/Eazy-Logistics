@@ -1,0 +1,50 @@
+services:
+  - type: web
+    name: eazy-logistics
+    runtime: node
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ENABLE_PYTHON_WORKER
+        value: "false"
+      - key: ATLASDB_URL
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: BASE_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        sync: false
+      - key: FACEBOOK_CLIENT_ID
+        sync: false
+      - key: FACEBOOK_CLIENT_SECRET
+        sync: false
+      - key: FACEBOOK_CALLBACK_URL
+        sync: false
+      - key: LINKEDIN_CLIENT_ID
+        sync: false
+      - key: LINKEDIN_CLIENT_SECRET
+        sync: false
+      - key: LINKEDIN_CALLBACK_URL
+        sync: false
+      - key: APPLE_CLIENT_ID
+        sync: false
+      - key: APPLE_TEAM_ID
+        sync: false
+      - key: APPLE_KEY_ID
+        sync: false
+      - key: APPLE_PRIVATE_KEY
+        sync: false
+      - key: APPLE_PRIVATE_KEY_PATH
+        sync: false
+      - key: APPLE_CALLBACK_URL
+        sync: false

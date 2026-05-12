@@ -37,27 +37,57 @@ const adminApiRouter = require("./routes/adminApi");
 const newDashboardRouter = require("./routes/newDashboard");
 const bookingRoutes = require("./routes/booking");
 
-mongoose
-  .connect(process.env.ATLASDB_URL)
-  .then(async () => {
-    console.log("MongoDB connected");
+const isVercelRuntime = Boolean(process.env.VERCEL || process.env.VERCEL_URL);
+const enableBackgroundWorkers = !isVercelRuntime;
+let dbConnectPromise = null;
 
-    try {
-      await refreshBookingSafetyStates();
-      setInterval(() => {
-        refreshBookingSafetyStates().catch((error) => {
-          console.error("Booking safety refresh error:", error.message || error);
-        });
-      }, 1000 * 60 * 15);
-    } catch (error) {
-      console.error("Initial booking safety refresh error:", error.message || error);
-    }
-  })
-  .catch((err) => console.log("DB Connection Error:", err));
+function connectDatabase() {
+  if (mongoose.connection.readyState === 1) return Promise.resolve(mongoose.connection);
+  if (dbConnectPromise) return dbConnectPromise;
+  if (!process.env.ATLASDB_URL) {
+    console.warn("ATLASDB_URL is missing. Database connection was skipped.");
+    return Promise.resolve(null);
+  }
+
+  dbConnectPromise = mongoose
+    .connect(process.env.ATLASDB_URL)
+    .then(async () => {
+      console.log("MongoDB connected");
+
+      if (!enableBackgroundWorkers) return mongoose.connection;
+
+      try {
+        await refreshBookingSafetyStates();
+        if (!global.BOOKING_SAFETY_REFRESH_STARTED) {
+          global.BOOKING_SAFETY_REFRESH_STARTED = true;
+          setInterval(() => {
+            refreshBookingSafetyStates().catch((error) => {
+              console.error("Booking safety refresh error:", error.message || error);
+            });
+          }, 1000 * 60 * 15);
+        }
+      } catch (error) {
+        console.error("Initial booking safety refresh error:", error.message || error);
+      }
+
+      return mongoose.connection;
+    })
+    .catch((err) => {
+      dbConnectPromise = null;
+      console.log("DB Connection Error:", err);
+      return null;
+    });
+
+  return dbConnectPromise;
+}
+
+connectDatabase().catch((error) => {
+  console.error("Unexpected DB bootstrap error:", error.message || error);
+});
 
 const pythonScriptPath = path.join(__dirname, "python_service", "app.py");
 const venvPythonPath = path.join(__dirname, "python_service", "venv", "Scripts", "python.exe");
-if (!global.PY_WORKER_STARTED) {
+if (enableBackgroundWorkers && process.env.ENABLE_PYTHON_WORKER !== "false" && !global.PY_WORKER_STARTED) {
   global.PY_WORKER_STARTED = true;
   try {
     const pythonExec = fs.existsSync(venvPythonPath) ? venvPythonPath : "python";
@@ -76,6 +106,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(async (_req, _res, next) => {
+  try {
+    await connectDatabase();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 const sessionConfig = {
   secret: process.env.SESSION_SECRET || "mysupersecretcode",
@@ -152,6 +190,12 @@ socketUtil.init(server, {
 });
 
 const PORT = process.env.PORT || 8080;
-server.listen(PORT, () => {
-  console.log(`Server Running on http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`Server Running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
+module.exports.server = server;
+module.exports.connectDatabase = connectDatabase;
